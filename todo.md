@@ -6,10 +6,10 @@
 - [x] Implement minimal main.rs
 
 ## Configuration Module
-- [ ] Define Config struct
-- [ ] Implement config loading from TOML
-- [ ] Write config validation functions
-- [ ] Add unit tests for config loading/validation
+- [x] Define Config struct
+- [x] Implement config loading from TOML
+- [x] Write config validation functions
+- [x] Add unit tests for config loading/validation
 
 ## Core Data Models
 - [ ] Implement MealPlan struct and enum types
