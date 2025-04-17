@@ -19,11 +19,11 @@
 - [x] Write unit tests for validation
 
 ## Storage Module
-- [ ] Create path and directory helper functions
-- [ ] Implement file path generation for meal plans
-- [ ] Add directory creation functionality
+- [x] Create path and directory helper functions
+- [x] Implement file path generation for meal plans 
+- [x] Add directory creation functionality
 - [ ] Implement basic file operations (read/write/check/delete)
-- [ ] Write unit tests for path generation and file operations
+- [x] Write unit tests for path generation and file operations
 
 ## Parser Module
 - [ ] Implement YAML frontmatter extraction/generation
