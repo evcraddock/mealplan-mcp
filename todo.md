@@ -12,11 +12,11 @@
 - [x] Add unit tests for config loading/validation
 
 ## Core Data Models
-- [ ] Implement MealPlan struct and enum types
-- [ ] Create Dish, Ingredient, and Nutrient structs
-- [ ] Define request/response structs for MCP commands
-- [ ] Add validation methods for all models
-- [ ] Write unit tests for validation
+- [x] Implement MealPlan struct and enum types
+- [x] Create Dish, Ingredient, and Nutrient structs
+- [x] Define request/response structs for MCP commands
+- [x] Add validation methods for all models
+- [x] Write unit tests for validation
 
 ## Storage Module
 - [ ] Create path and directory helper functions
