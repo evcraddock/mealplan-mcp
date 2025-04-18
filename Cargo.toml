@@ -14,3 +14,4 @@ anyhow = "1.0"
 thiserror = "1.0"
 dirs = "5.0"
 tempfile = "3.10"
+tokio = { version = "1.32", features = ["full"] }

@@ -38,11 +38,12 @@
 - [x] Write unit tests for error handling
 
 ## MCP Command Handlers
-- [ ] Implement createMealPlan handler
+- [x] Implement createMealPlan handler
 - [ ] Add listMealPlans handler with filtering
 - [ ] Create viewMealPlanMarkdown and viewMealPlanJSON handlers
 - [ ] Implement deleteMealPlan handler
-- [ ] Write integration tests for all handlers
+- [x] Write integration tests for createMealPlan handler
+- [ ] Write integration tests for other handlers
 
 ## Server Integration
 - [ ] Update main.rs with MCP SDK initialization
