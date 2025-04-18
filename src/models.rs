@@ -43,7 +43,7 @@ pub enum ValidationError {
 }
 
 /// Meal types supported by the system
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum MealType {
     Breakfast,
@@ -185,7 +185,7 @@ impl MealPlan {
 // Request and response structs for MCP commands
 
 /// Request to create a new meal plan
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CreateMealPlanRequest {
     pub date: DateTime<Utc>,
     pub meal_type: MealType,
@@ -231,7 +231,7 @@ pub struct CreateMealPlanResponse {
 }
 
 /// Request to list meal plans within a date range
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ListMealPlansRequest {
     pub start_date: DateTime<Utc>,
     pub end_date: DateTime<Utc>,
@@ -265,21 +265,21 @@ pub struct ListMealPlansResponse {
 }
 
 /// Request to view a meal plan in Markdown format
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ViewMealPlanMarkdownRequest {
     pub date: DateTime<Utc>,
     pub meal_type: MealType,
 }
 
 /// Request to view a meal plan in JSON format
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ViewMealPlanJsonRequest {
     pub date: DateTime<Utc>,
     pub meal_type: MealType,
 }
 
 /// Request to delete a meal plan
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DeleteMealPlanRequest {
     pub date: DateTime<Utc>,
     pub meal_type: MealType,
