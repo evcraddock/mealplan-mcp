@@ -41,11 +41,11 @@
 - [x] Implement createMealPlan handler
 - [x] Add listMealPlans handler with filtering
 - [x] Create viewMealPlanMarkdown and viewMealPlanJSON handlers
-- [ ] Implement deleteMealPlan handler
+- [x] Implement deleteMealPlan handler
 - [x] Write integration tests for createMealPlan handler
 - [x] Write integration tests for listMealPlans handler
 - [x] Write integration tests for viewMealPlan handlers
-- [ ] Write integration tests for deleteMealPlan handler
+- [x] Write integration tests for deleteMealPlan handler
 
 ## Server Integration
 - [ ] Update main.rs with MCP SDK initialization

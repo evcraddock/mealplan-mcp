@@ -6,7 +6,7 @@ use chrono::{Datelike, TimeZone, Utc};
 use serde_json;
 
 use crate::config::Config;
-use crate::models::{CreateMealPlanRequest, CreateMealPlanResponse, ListMealPlansRequest, ListMealPlansResponse, MealPlanSummary, MealType, MealPlan, ViewMealPlanMarkdownRequest, ViewMealPlanJsonRequest};
+use crate::models::{CreateMealPlanRequest, CreateMealPlanResponse, ListMealPlansRequest, ListMealPlansResponse, MealPlanSummary, MealType, MealPlan, ViewMealPlanMarkdownRequest, ViewMealPlanJsonRequest, DeleteMealPlanRequest, DeleteMealPlanResponse};
 use crate::storage::{compute_directory_path, compute_file_path, ensure_directories_exist, meal_plan_exists, write_meal_plan};
 use crate::parser::{extract_frontmatter, parse_frontmatter, serialize_meal_plan_to_markdown, deserialize_markdown_to_meal_plan};
 use crate::errors::{AlreadyExistsError, NotFoundError};
@@ -153,6 +153,28 @@ pub async fn view_meal_plan_json(request: ViewMealPlanJsonRequest, config: &Conf
         Ok(json) => Ok(json),
         Err(e) => Err(anyhow::anyhow!("Failed to serialize meal plan to JSON: {}", e)),
     }
+}
+
+/// Handler for the deleteMealPlan command
+pub async fn delete_meal_plan_handler(request: DeleteMealPlanRequest, config: &Config) -> Result<DeleteMealPlanResponse> {
+    // Compute file path
+    let file_path = compute_file_path(&request.date, &request.meal_type, &config.root_folder);
+    
+    // Check if the file exists
+    if !file_path.exists() {
+        return Err(NotFoundError::MealPlanNotFound(file_path.to_string_lossy().to_string()).into());
+    }
+    
+    // Delete the meal plan file
+    crate::storage::delete_meal_plan(&request.date, &request.meal_type, &config.root_folder)?;
+    
+    // Return success response
+    Ok(DeleteMealPlanResponse {
+        success: true,
+        message: format!("Successfully deleted meal plan for {} {}", 
+            request.meal_type.to_string(), 
+            request.date.format("%Y-%m-%d")),
+    })
 }
 
 /// Extracts meal plan summary from a file, returns None if file is malformed or doesn't exist
@@ -714,5 +736,56 @@ mod tests {
         // View meal plan JSON should return an error
         let result = view_meal_plan_json(view_request, &config).await;
         assert!(result.is_err());
+    }
+    
+    // Tests for delete_meal_plan
+    
+    #[tokio::test]
+    async fn test_delete_meal_plan_success() {
+        let (config, _temp_dir) = setup_test_config();
+        let request = create_test_request();
+        
+        // First create a meal plan
+        let _ = create_meal_plan(request.clone(), &config).await.unwrap();
+        
+        // Verify the meal plan file exists
+        let file_path = compute_file_path(&request.date, &request.meal_type, &config.root_folder);
+        assert!(file_path.exists());
+        
+        // Create a delete request for the same meal plan
+        let delete_request = DeleteMealPlanRequest {
+            date: request.date,
+            meal_type: request.meal_type.clone(),
+        };
+        
+        // Delete the meal plan
+        let response = delete_meal_plan_handler(delete_request, &config).await.unwrap();
+        
+        // Verify the success response
+        assert!(response.success);
+        assert!(response.message.contains("Successfully deleted"));
+        
+        // Verify the file no longer exists
+        assert!(!file_path.exists());
+    }
+    
+    #[tokio::test]
+    async fn test_delete_meal_plan_not_found() {
+        let (config, _temp_dir) = setup_test_config();
+        
+        // Create a delete request for a non-existent meal plan
+        let delete_request = DeleteMealPlanRequest {
+            date: Utc.with_ymd_and_hms(2023, 6, 1, 12, 0, 0).unwrap(),
+            meal_type: MealType::Lunch,
+        };
+        
+        // Delete the meal plan should return a NotFound error
+        let result = delete_meal_plan_handler(delete_request, &config).await;
+        assert!(result.is_err());
+        
+        // Check error type
+        let err = result.unwrap_err();
+        let downcast_err = err.downcast::<NotFoundError>();
+        assert!(downcast_err.is_ok());
     }
 }
