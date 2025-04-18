@@ -39,10 +39,11 @@
 
 ## MCP Command Handlers
 - [x] Implement createMealPlan handler
-- [ ] Add listMealPlans handler with filtering
+- [x] Add listMealPlans handler with filtering
 - [ ] Create viewMealPlanMarkdown and viewMealPlanJSON handlers
 - [ ] Implement deleteMealPlan handler
 - [x] Write integration tests for createMealPlan handler
+- [x] Write integration tests for listMealPlans handler
 - [ ] Write integration tests for other handlers
 
 ## Server Integration
