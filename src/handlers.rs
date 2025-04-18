@@ -3,12 +3,13 @@ use anyhow::Result;
 use std::fs;
 use std::path::Path;
 use chrono::{Datelike, TimeZone, Utc};
+use serde_json;
 
 use crate::config::Config;
-use crate::models::{CreateMealPlanRequest, CreateMealPlanResponse, ListMealPlansRequest, ListMealPlansResponse, MealPlanSummary, MealType};
+use crate::models::{CreateMealPlanRequest, CreateMealPlanResponse, ListMealPlansRequest, ListMealPlansResponse, MealPlanSummary, MealType, MealPlan, ViewMealPlanMarkdownRequest, ViewMealPlanJsonRequest};
 use crate::storage::{compute_directory_path, compute_file_path, ensure_directories_exist, meal_plan_exists, write_meal_plan};
-use crate::parser::{extract_frontmatter, parse_frontmatter, serialize_meal_plan_to_markdown};
-use crate::errors::AlreadyExistsError;
+use crate::parser::{extract_frontmatter, parse_frontmatter, serialize_meal_plan_to_markdown, deserialize_markdown_to_meal_plan};
+use crate::errors::{AlreadyExistsError, NotFoundError};
 
 /// Handler for the createMealPlan command
 pub async fn create_meal_plan(request: CreateMealPlanRequest, config: &Config) -> Result<CreateMealPlanResponse> {
@@ -112,6 +113,46 @@ pub async fn list_meal_plans(request: ListMealPlansRequest, config: &Config) -> 
     });
     
     Ok(ListMealPlansResponse { meal_plans })
+}
+
+/// Handler for the viewMealPlanMarkdown command
+pub async fn view_meal_plan_markdown(request: ViewMealPlanMarkdownRequest, config: &Config) -> Result<String> {
+    // Compute file path
+    let file_path = compute_file_path(&request.date, &request.meal_type, &config.root_folder);
+    
+    // Check if the file exists
+    if !file_path.exists() {
+        return Err(NotFoundError::MealPlanNotFound(file_path.to_string_lossy().to_string()).into());
+    }
+    
+    // Read the file content
+    match fs::read_to_string(&file_path) {
+        Ok(content) => Ok(content),
+        Err(e) => Err(anyhow::anyhow!("Failed to read meal plan markdown: {}", e)),
+    }
+}
+
+/// Handler for the viewMealPlanJson command
+pub async fn view_meal_plan_json(request: ViewMealPlanJsonRequest, config: &Config) -> Result<String> {
+    // Compute file path
+    let file_path = compute_file_path(&request.date, &request.meal_type, &config.root_folder);
+    
+    // Check if the file exists
+    if !file_path.exists() {
+        return Err(NotFoundError::MealPlanNotFound(file_path.to_string_lossy().to_string()).into());
+    }
+    
+    // Read the file content
+    let content = fs::read_to_string(&file_path)?;
+    
+    // Parse the markdown into a MealPlan struct
+    let meal_plan = deserialize_markdown_to_meal_plan(&content)?;
+    
+    // Serialize the MealPlan to JSON
+    match serde_json::to_string_pretty(&meal_plan) {
+        Ok(json) => Ok(json),
+        Err(e) => Err(anyhow::anyhow!("Failed to serialize meal plan to JSON: {}", e)),
+    }
 }
 
 /// Extracts meal plan summary from a file, returns None if file is malformed or doesn't exist
@@ -539,5 +580,139 @@ mod tests {
         assert_eq!(response.meal_plans.len(), 1);
         assert_eq!(response.meal_plans[0].meal_type, MealType::Breakfast);
         assert_eq!(response.meal_plans[0].cook, "Alice");
+    }
+    
+    // Tests for view_meal_plan_markdown
+    
+    #[tokio::test]
+    async fn test_view_meal_plan_markdown_success() {
+        let (config, _temp_dir) = setup_test_config();
+        let request = create_test_request();
+        
+        // First create a meal plan
+        let _ = create_meal_plan(request.clone(), &config).await.unwrap();
+        
+        // Create a view request for the same meal plan
+        let view_request = ViewMealPlanMarkdownRequest {
+            date: request.date,
+            meal_type: request.meal_type.clone(),
+        };
+        
+        // View meal plan markdown
+        let markdown = view_meal_plan_markdown(view_request, &config).await.unwrap();
+        
+        // Verify the markdown contains expected content
+        assert!(markdown.contains("---"));  // Frontmatter delimiter
+        assert!(markdown.contains("date:"));
+        assert!(markdown.contains("meal_type: lunch"));
+        assert!(markdown.contains("title: Test Lunch"));
+        assert!(markdown.contains("cook: Test Chef"));
+        assert!(markdown.contains("## Test Dish"));  // Dish name
+        assert!(markdown.contains("### Ingredients"));
+        assert!(markdown.contains("Test Ingredient"));
+        assert!(markdown.contains("### Instructions"));
+        assert!(markdown.contains("Test instruction"));
+        assert!(markdown.contains("### Nutrients"));
+        assert!(markdown.contains("Protein"));
+    }
+    
+    #[tokio::test]
+    async fn test_view_meal_plan_markdown_not_found() {
+        let (config, _temp_dir) = setup_test_config();
+        
+        // Create a view request for a non-existent meal plan
+        let view_request = ViewMealPlanMarkdownRequest {
+            date: Utc.with_ymd_and_hms(2023, 6, 1, 12, 0, 0).unwrap(),
+            meal_type: MealType::Lunch,
+        };
+        
+        // View meal plan markdown should return NotFound error
+        let result = view_meal_plan_markdown(view_request, &config).await;
+        assert!(result.is_err());
+        
+        // Check error type
+        let err = result.unwrap_err();
+        let downcast_err = err.downcast::<NotFoundError>();
+        assert!(downcast_err.is_ok());
+    }
+    
+    // Tests for view_meal_plan_json
+    
+    #[tokio::test]
+    async fn test_view_meal_plan_json_success() {
+        let (config, _temp_dir) = setup_test_config();
+        let request = create_test_request();
+        
+        // First create a meal plan
+        let _ = create_meal_plan(request.clone(), &config).await.unwrap();
+        
+        // Create a view request for the same meal plan
+        let view_request = ViewMealPlanJsonRequest {
+            date: request.date,
+            meal_type: request.meal_type.clone(),
+        };
+        
+        // View meal plan as JSON
+        let meal_plan_json = view_meal_plan_json(view_request, &config).await.unwrap();
+        
+        // Deserialize back to MealPlan to verify structure
+        let meal_plan: MealPlan = serde_json::from_str(&meal_plan_json).unwrap();
+        
+        // Verify the contents match the original request
+        assert_eq!(meal_plan.title, request.title);
+        assert_eq!(meal_plan.cook, request.cook);
+        assert_eq!(meal_plan.dishes.len(), 1);
+        assert_eq!(meal_plan.dishes[0].name, "Test Dish");
+        assert_eq!(meal_plan.dishes[0].ingredients.len(), 1);
+        assert_eq!(meal_plan.dishes[0].ingredients[0].name, "Test Ingredient");
+        assert_eq!(meal_plan.dishes[0].nutrients.len(), 1);
+        assert_eq!(meal_plan.dishes[0].nutrients[0].name, "Protein");
+    }
+    
+    #[tokio::test]
+    async fn test_view_meal_plan_json_not_found() {
+        let (config, _temp_dir) = setup_test_config();
+        
+        // Create a view request for a non-existent meal plan
+        let view_request = ViewMealPlanJsonRequest {
+            date: Utc.with_ymd_and_hms(2023, 6, 1, 12, 0, 0).unwrap(),
+            meal_type: MealType::Lunch,
+        };
+        
+        // View meal plan JSON should return NotFound error
+        let result = view_meal_plan_json(view_request, &config).await;
+        assert!(result.is_err());
+        
+        // Check error type
+        let err = result.unwrap_err();
+        let downcast_err = err.downcast::<NotFoundError>();
+        assert!(downcast_err.is_ok());
+    }
+    
+    // Test for malformed markdown file
+    
+    #[tokio::test]
+    async fn test_view_meal_plan_json_malformed_file() {
+        let (config, _temp_dir) = setup_test_config();
+        let request = create_test_request();
+        
+        // First create the meal plan
+        let _ = create_meal_plan(request.clone(), &config).await.unwrap();
+        
+        // Get the file path
+        let file_path = compute_file_path(&request.date, &request.meal_type, &config.root_folder);
+        
+        // Overwrite with invalid content (no frontmatter)
+        fs::write(&file_path, "This is not a valid markdown file with frontmatter").unwrap();
+        
+        // Create a view request for the same meal plan
+        let view_request = ViewMealPlanJsonRequest {
+            date: request.date,
+            meal_type: request.meal_type.clone(),
+        };
+        
+        // View meal plan JSON should return an error
+        let result = view_meal_plan_json(view_request, &config).await;
+        assert!(result.is_err());
     }
 }
