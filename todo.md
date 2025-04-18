@@ -26,10 +26,10 @@
 - [x] Write unit tests for path generation and file operations
 
 ## Parser Module
-- [ ] Implement YAML frontmatter extraction/generation
+- [x] Implement YAML frontmatter extraction/generation
 - [ ] Create Markdown body parsing/generation for dishes
 - [ ] Add complete serialization/deserialization functions
-- [ ] Write unit tests for parsing functions
+- [x] Write unit tests for YAML frontmatter parsing
 
 ## Error Handling
 - [ ] Define custom error types using thiserror
