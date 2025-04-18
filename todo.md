@@ -27,15 +27,15 @@
 
 ## Parser Module
 - [x] Implement YAML frontmatter extraction/generation
-- [ ] Create Markdown body parsing/generation for dishes
-- [ ] Add complete serialization/deserialization functions
+- [x] Create Markdown body parsing/generation for dishes
+- [x] Add complete serialization/deserialization functions
 - [x] Write unit tests for YAML frontmatter parsing
 
 ## Error Handling
-- [ ] Define custom error types using thiserror
-- [ ] Implement conversions from library errors
-- [ ] Add conversion to MCP errors
-- [ ] Write unit tests for error handling
+- [x] Define custom error types using thiserror
+- [x] Implement conversions from library errors
+- [x] Add conversion to MCP errors
+- [x] Write unit tests for error handling
 
 ## MCP Command Handlers
 - [ ] Implement createMealPlan handler
