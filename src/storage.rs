@@ -1,5 +1,6 @@
 // Storage module for the Meal Plan MCP server
 use std::fs;
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use chrono::{DateTime, Datelike, Utc};
 use anyhow::Result;
@@ -15,11 +16,8 @@ pub enum StorageError {
     #[error("Path does not exist: {0}")]
     NonExistentPath(String),
     
-    #[error("Path is not a directory: {0}")]
-    NotADirectory(String),
-    
-    #[error("Path is not writable: {0}")]
-    NotWritable(String),
+    #[error("File not found: {0}")]
+    FileNotFound(PathBuf),
 }
 
 /// Computes the directory path for a meal plan
@@ -61,6 +59,60 @@ pub fn ensure_directories_exist(path: &Path) -> Result<(), StorageError> {
     
     // Create all directories in the path
     fs::create_dir_all(parent)?;
+    
+    Ok(())
+}
+
+/// Writes content to a meal plan file
+/// Creates necessary directories if they don't exist
+pub fn write_meal_plan(content: &str, date: &DateTime<Utc>, meal_type: &MealType, root_folder: &Path) -> Result<(), StorageError> {
+    let file_path = compute_file_path(date, meal_type, root_folder);
+    
+    // Ensure directories exist
+    ensure_directories_exist(&file_path)?;
+    
+    // Write content to file
+    let mut file = fs::File::create(&file_path)?;
+    file.write_all(content.as_bytes())?;
+    
+    Ok(())
+}
+
+/// Reads content from a meal plan file
+/// Returns an error if the file doesn't exist
+pub fn read_meal_plan(date: &DateTime<Utc>, meal_type: &MealType, root_folder: &Path) -> Result<String, StorageError> {
+    let file_path = compute_file_path(date, meal_type, root_folder);
+    
+    // Check if file exists
+    if !file_path.exists() {
+        return Err(StorageError::FileNotFound(file_path));
+    }
+    
+    // Read file content
+    let mut file = fs::File::open(&file_path)?;
+    let mut content = String::new();
+    file.read_to_string(&mut content)?;
+    
+    Ok(content)
+}
+
+/// Checks if a meal plan file exists
+pub fn meal_plan_exists(date: &DateTime<Utc>, meal_type: &MealType, root_folder: &Path) -> bool {
+    let file_path = compute_file_path(date, meal_type, root_folder);
+    file_path.exists()
+}
+
+/// Deletes a meal plan file if it exists
+pub fn delete_meal_plan(date: &DateTime<Utc>, meal_type: &MealType, root_folder: &Path) -> Result<(), StorageError> {
+    let file_path = compute_file_path(date, meal_type, root_folder);
+    
+    // Check if file exists
+    if !file_path.exists() {
+        return Err(StorageError::FileNotFound(file_path));
+    }
+    
+    // Delete the file
+    fs::remove_file(&file_path)?;
     
     Ok(())
 }
@@ -144,5 +196,117 @@ mod tests {
         
         // Verify the file exists now
         assert!(nested_path.exists());
+    }
+    
+    #[test]
+    fn test_write_and_read_meal_plan() {
+        // Create a temporary directory for testing
+        let temp_dir = tempdir().unwrap();
+        let root_folder = temp_dir.path();
+        
+        // Create test data
+        let date = Utc.with_ymd_and_hms(2023, 5, 15, 0, 0, 0).unwrap();
+        let meal_type = MealType::Lunch;
+        let content = "This is a test meal plan content";
+        
+        // Write meal plan
+        write_meal_plan(content, &date, &meal_type, root_folder).unwrap();
+        
+        // Verify the file exists
+        let file_path = compute_file_path(&date, &meal_type, root_folder);
+        assert!(file_path.exists());
+        
+        // Read meal plan
+        let read_content = read_meal_plan(&date, &meal_type, root_folder).unwrap();
+        
+        // Verify content
+        assert_eq!(read_content, content);
+    }
+    
+    #[test]
+    fn test_read_nonexistent_meal_plan() {
+        // Create a temporary directory for testing
+        let temp_dir = tempdir().unwrap();
+        let root_folder = temp_dir.path();
+        
+        // Create test data for a file that doesn't exist
+        let date = Utc.with_ymd_and_hms(2023, 6, 20, 0, 0, 0).unwrap();
+        let meal_type = MealType::Dinner;
+        
+        // Attempt to read non-existent meal plan
+        let result = read_meal_plan(&date, &meal_type, root_folder);
+        
+        // Verify the error
+        assert!(result.is_err());
+        match result {
+            Err(StorageError::FileNotFound(_)) => (),
+            _ => panic!("Expected FileNotFound error"),
+        }
+    }
+    
+    #[test]
+    fn test_meal_plan_exists() {
+        // Create a temporary directory for testing
+        let temp_dir = tempdir().unwrap();
+        let root_folder = temp_dir.path();
+        
+        // Create test data
+        let date = Utc.with_ymd_and_hms(2023, 7, 10, 0, 0, 0).unwrap();
+        let meal_type = MealType::Breakfast;
+        let content = "Test breakfast content";
+        
+        // Initially the meal plan should not exist
+        assert!(!meal_plan_exists(&date, &meal_type, root_folder));
+        
+        // Write the meal plan
+        write_meal_plan(content, &date, &meal_type, root_folder).unwrap();
+        
+        // Now the meal plan should exist
+        assert!(meal_plan_exists(&date, &meal_type, root_folder));
+    }
+    
+    #[test]
+    fn test_delete_meal_plan() {
+        // Create a temporary directory for testing
+        let temp_dir = tempdir().unwrap();
+        let root_folder = temp_dir.path();
+        
+        // Create test data
+        let date = Utc.with_ymd_and_hms(2023, 8, 5, 0, 0, 0).unwrap();
+        let meal_type = MealType::Snack;
+        let content = "Test snack content";
+        
+        // Write the meal plan
+        write_meal_plan(content, &date, &meal_type, root_folder).unwrap();
+        
+        // Verify the file exists
+        assert!(meal_plan_exists(&date, &meal_type, root_folder));
+        
+        // Delete the meal plan
+        delete_meal_plan(&date, &meal_type, root_folder).unwrap();
+        
+        // Verify the file no longer exists
+        assert!(!meal_plan_exists(&date, &meal_type, root_folder));
+    }
+    
+    #[test]
+    fn test_delete_nonexistent_meal_plan() {
+        // Create a temporary directory for testing
+        let temp_dir = tempdir().unwrap();
+        let root_folder = temp_dir.path();
+        
+        // Create test data for a file that doesn't exist
+        let date = Utc.with_ymd_and_hms(2023, 9, 15, 0, 0, 0).unwrap();
+        let meal_type = MealType::Lunch;
+        
+        // Attempt to delete non-existent meal plan
+        let result = delete_meal_plan(&date, &meal_type, root_folder);
+        
+        // Verify the error
+        assert!(result.is_err());
+        match result {
+            Err(StorageError::FileNotFound(_)) => (),
+            _ => panic!("Expected FileNotFound error"),
+        }
     }
 }
