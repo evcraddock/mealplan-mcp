@@ -1,0 +1,64 @@
+{
+  "date": "2023-06-15T18:30:00Z",
+  "meal_type": "dinner",
+  "title": "Italian Night Feast",
+  "cook": "Mario Batali",
+  "dishes": [
+    {
+      "name": "Classic Spaghetti Carbonara",
+      "ingredients": [
+        { "name": "Spaghetti", "amount": "400g" },
+        { "name": "Pancetta", "amount": "150g" },
+        { "name": "Egg yolks", "amount": "4 large" },
+        { "name": "Parmesan cheese", "amount": "50g, freshly grated" },
+        { "name": "Black pepper", "amount": "1 tsp, freshly ground" },
+        { "name": "Salt", "amount": "to taste" }
+      ],
+      "instructions": "1. Cook the spaghetti in salted boiling water until al dente.\n2. While the pasta cooks, fry the pancetta until crispy.\n3. In a bowl, whisk the egg yolks with grated Parmesan.\n4. Drain the pasta, reserving a bit of cooking water.\n5. Working quickly, mix the hot pasta with the pancetta, then remove from heat.\n6. Add the egg mixture, stirring quickly to create a creamy sauce.\n7. If needed, add a splash of pasta water to loosen the sauce.\n8. Season with black pepper and serve immediately.",
+      "nutrients": [
+        { "name": "Calories", "amount": 450, "unit": "kcal" },
+        { "name": "Protein", "amount": 20, "unit": "g" },
+        { "name": "Carbohydrates", "amount": 65, "unit": "g" },
+        { "name": "Fat", "amount": 15, "unit": "g" }
+      ]
+    },
+    {
+      "name": "Caprese Salad",
+      "ingredients": [
+        { "name": "Tomatoes", "amount": "4 medium, sliced" },
+        { "name": "Fresh mozzarella", "amount": "200g, sliced" },
+        { "name": "Fresh basil leaves", "amount": "1 handful" },
+        { "name": "Extra virgin olive oil", "amount": "2 tbsp" },
+        { "name": "Balsamic glaze", "amount": "1 tbsp" },
+        { "name": "Salt", "amount": "to taste" },
+        { "name": "Black pepper", "amount": "to taste" }
+      ],
+      "instructions": "1. Arrange alternating slices of tomato and mozzarella on a serving plate.\n2. Tuck basil leaves between the slices.\n3. Drizzle with olive oil and balsamic glaze.\n4. Season with salt and freshly ground black pepper.\n5. Serve immediately.",
+      "nutrients": [
+        { "name": "Calories", "amount": 320, "unit": "kcal" },
+        { "name": "Protein", "amount": 14, "unit": "g" },
+        { "name": "Carbohydrates", "amount": 10, "unit": "g" },
+        { "name": "Fat", "amount": 25, "unit": "g" }
+      ]
+    },
+    {
+      "name": "Tiramisu",
+      "ingredients": [
+        { "name": "Mascarpone cheese", "amount": "500g" },
+        { "name": "Eggs", "amount": "4, separated" },
+        { "name": "Sugar", "amount": "100g" },
+        { "name": "Strong coffee", "amount": "200ml, cooled" },
+        { "name": "Ladyfinger biscuits", "amount": "24" },
+        { "name": "Cocoa powder", "amount": "2 tbsp" },
+        { "name": "Amaretto", "amount": "30ml (optional)" }
+      ],
+      "instructions": "1. Beat egg yolks with sugar until pale and creamy.\n2. Fold mascarpone into the egg yolk mixture.\n3. In a separate bowl, whip egg whites until stiff peaks form.\n4. Gently fold egg whites into the mascarpone mixture.\n5. Mix coffee with Amaretto if using.\n6. Dip ladyfingers quickly into coffee mixture and lay in serving dish.\n7. Spread half the mascarpone mixture over the ladyfingers.\n8. Repeat with another layer of soaked ladyfingers and remaining mascarpone.\n9. Dust with cocoa powder on top.\n10. Refrigerate for at least 4 hours, preferably overnight.",
+      "nutrients": [
+        { "name": "Calories", "amount": 380, "unit": "kcal" },
+        { "name": "Protein", "amount": 7, "unit": "g" },
+        { "name": "Carbohydrates", "amount": 30, "unit": "g" },
+        { "name": "Fat", "amount": 25, "unit": "g" }
+      ]
+    }
+  ]
+}
