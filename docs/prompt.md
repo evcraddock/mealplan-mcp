@@ -11,8 +11,8 @@ You are a senior Python dev.
 Goal: create project skeleton for "mealplan-mcp".
 Tasks:
 1. Generate a pyproject.toml using uv.
-2. Add deps: fastapi, pydantic, python-slugify, rich.
-3. Dev-deps: pytest, pytest-cov, ruff, black, pyright, httpx, coverage-badger.
+2. Add deps: fastmcp, pydantic, python-slugify, rich.
+3. Dev-deps: pytest, pytest-cov, ruff, black, pyright, coverage-badger.
 4. Create `.pre-commit-config.yaml` with black+ruff hooks.
 Return ONLY the file tree (prefix paths with `📄`), and the contents of pyproject.toml and pre-commit file.
 ```
@@ -98,16 +98,16 @@ Add tests ensuring get_ignored_ingredients returns sorted list of strings.
 Implement service; reuse IgnoredStore.load(); tests pass.
 ```
 
-### Prompt 12 – MCP Ignored Tools Contract Tests
+### Prompt 12 – FastMCP Ignored Tools Contract Tests
 ```text
-Using MCP test client, assert:
+Using FastMCP test client, assert:
 add_ignored_ingredient({"name":"salt"}) -> {"ok":"Saved"}
 get_ignored_ingredients() -> ["salt"]
 ```
 
-### Prompt 13 – MCP Ignored Tools Implementation
+### Prompt 13 – FastMCP Ignored Tools Implementation
 ```text
-Create `mealplan_mcp.tools.ignored` providing two MCP tools:
+Create `mealplan_mcp.tools.ignored` providing two FastMCP tools:
 - add_ignored_ingredient
 - get_ignored_ingredients
 Both properly wired to their respective services.
@@ -147,16 +147,16 @@ Ensure alphabetical natural sort by internal name. Corrupt JSON skipped.
 Implement listing; reuse utils.paths; tests green.
 ```
 
-### Prompt 20 – MCP Dish Tools Contract Tests
+### Prompt 20 – FastMCP Dish Tools Contract Tests
 ```text
 Test:
 store_dish({...}) -> {"ok":"dishes/chili.json"}
 list_dishes()     -> [...]
 ```
 
-### Prompt 21 – MCP Dish Tools Implementation
+### Prompt 21 – FastMCP Dish Tools Implementation
 ```text
-Create `mealplan_mcp.tools.dish` providing two MCP tools:
+Create `mealplan_mcp.tools.dish` providing two FastMCP tools:
 - store_dish
 - list_dishes
 Both properly wired to their respective services.
@@ -185,36 +185,36 @@ Service: generate_grocery_list(start,end):
 - Writes file, returns relative path
 ```
 
-### Prompt 26 – MCP Grocery List Tool Test
+### Prompt 26 – FastMCP Grocery List Tool Test
 ```text
 generate_grocery_list({"start":"2025-05-10","end":"2025-05-17"}) -> {"ok":".../to_...md"}
 ```
 
-### Prompt 27 – MCP Grocery List Tool Implementation
+### Prompt 27 – FastMCP Grocery List Tool Implementation
 ```text
 Create `mealplan_mcp.tools.grocery` providing:
 - generate_grocery_list
 Properly wired to its service.
 ```
 
-### Prompt 28 – MCP Server Integration Tests
+### Prompt 28 – FastMCP Server Integration Tests
 ```text
-tests/e2e/test_mcp.py verifies that:
-- All 5 MCP tools are registered
-- Tools can be called via the MCP protocol
+tests/e2e/test_fastmcp.py verifies that:
+- All 5 FastMCP tools are registered
+- Tools can be called via the FastMCP protocol
 ```
 
-### Prompt 29 – MCP Server Implementation
+### Prompt 29 – FastMCP Server Implementation
 ```text
 Create `mealplan_mcp.server` with:
-- MCP server configuration
+- FastMCP server configuration
 - Registration of all 5 tools
-- Export of a runnable MCP server instance
+- Export of a runnable FastMCP server instance
 ```
 
-### Prompt 30 – MCP End-to-End Workflow Tests
+### Prompt 30 – FastMCP End-to-End Workflow Tests
 ```text
-Run through full MCP tool workflow:
+Run through full FastMCP tool workflow:
 - store_dish with a sample dish
 - add_ignored_ingredient with an ingredient
 - generate_grocery_list using the dish and respecting ignored ingredients
