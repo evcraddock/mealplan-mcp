@@ -37,7 +37,7 @@ Add `tests/test_slugify.py` with pytest parametrized cases:
 Ensure test fails (slugify not implemented). Output the test file only.
 ```
 
-### Prompt 4 – slugify Implementation
+### ✅ Prompt 4 – slugify Implementation
 ```text
 Implement `mealplan_mcp.utils.slugify`:
 - Lowercase, trim, strip non-ASCII, collapse whitespace → dash.
