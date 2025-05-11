@@ -17,14 +17,14 @@ Tasks:
 Return ONLY the file tree (prefix paths with `📄`), and the contents of pyproject.toml and pre-commit file.
 ```
 
-### Prompt 2 – CI Workflow
+### ✅ Prompt 2 – CI Workflow
 ```text
-Extend previous repo.  
+Extend previous repo.
 Add `.github/workflows/ci.yml` that:
-- Runs on push + PR.  
-- Uses uv for dependency management.  
-- Installs deps, runs `ruff`, `black --check`, `pytest --cov`.  
-- Fails if coverage < 90 %.  
+- Runs on push + PR.
+- Uses uv for dependency management.
+- Installs deps, runs `ruff`, `black --check`, `pytest --cov`.
+- Fails if coverage < 90 %.
 Return the yaml file only.
 ```
 
