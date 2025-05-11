@@ -72,7 +72,7 @@ Implement `mealplan_mcp.models.ignored` with:
 All tests green.
 ```
 
-### Prompt 8 – add_ignored_ingredient Service Tests
+### ✅ Prompt 8 – add_ignored_ingredient Service Tests
 ```text
 Add `tests/ignored/test_add_service.py`:
 - Blank string → ValueError
