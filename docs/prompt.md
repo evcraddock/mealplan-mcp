@@ -46,7 +46,7 @@ Implement `mealplan_mcp.utils.slugify`:
 Return updated file. All tests must pass.
 ```
 
-### Prompt 5 – Path Builders
+### ✅ Prompt 5 – Path Builders
 ```text
 Create `mealplan_mcp.utils.paths` with:
 - mealplan_root = Path(os.environ["MEALPLANPATH"])
