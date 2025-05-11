@@ -28,7 +28,7 @@ Add `.github/workflows/ci.yml` that:
 Return the yaml file only.
 ```
 
-### Prompt 3 – slugify() Unit Tests
+### ✅ Prompt 3 – slugify() Unit Tests
 ```text
 Add `tests/test_slugify.py` with pytest parametrized cases:
 (" Chili  Con Carne! ", "chili-con-carne")
@@ -40,9 +40,9 @@ Ensure test fails (slugify not implemented). Output the test file only.
 ### Prompt 4 – slugify Implementation
 ```text
 Implement `mealplan_mcp.utils.slugify`:
-- Lowercase, trim, strip non-ASCII, collapse whitespace → dash.  
-- Collapse dashes. Trim to 100 chars.  
-- Provide suffix_if_exists(slug, existing_set) helper.  
+- Lowercase, trim, strip non-ASCII, collapse whitespace → dash.
+- Collapse dashes. Trim to 100 chars.
+- Provide suffix_if_exists(slug, existing_set) helper.
 Return updated file. All tests must pass.
 ```
 
