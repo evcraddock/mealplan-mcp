@@ -42,7 +42,7 @@ jobs:
     - name: Run tests with coverage
       run: |
         source .venv/bin/activate
-        pytest --cov=models --cov-report=xml
+        pytest tests/ --cov=models --cov-report=xml
 
     - name: Check coverage threshold
       run: |
