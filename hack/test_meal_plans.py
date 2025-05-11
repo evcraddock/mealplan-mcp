@@ -6,7 +6,6 @@ Test script for calling the MCP meal plan tools.
 
 import asyncio
 import json
-from datetime import datetime
 from mcp.client import Client
 
 async def test_hello():
