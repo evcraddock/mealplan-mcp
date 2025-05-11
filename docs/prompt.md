@@ -80,7 +80,7 @@ Add `tests/ignored/test_add_service.py`:
 - Duplicate ignored gracefully
 ```
 
-### Prompt 9 – add_ignored_ingredient Service Impl
+### ✅ Prompt 9 – add_ignored_ingredient Service Impl
 ```text
 Implement `mealplan_mcp.services.ignored.add_ingredient(name:str)`:
 - Apply cleaning rules
