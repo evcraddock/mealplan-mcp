@@ -14,6 +14,8 @@ import tempfile
 
 import pytest
 
+from mealplan_mcp.utils.paths import mealplan_root
+
 
 # For the tests we're just setting up the required interface,
 # not importing the actual implementation (which doesn't exist yet)
@@ -141,3 +143,18 @@ def test_save_ingredients(temp_file):
     except (json.JSONDecodeError, FileNotFoundError, AssertionError):
         # This is expected with the mock implementation
         pytest.skip("Skipping assertions as implementation doesn't exist yet")
+
+
+def test_default_path():
+    """Test that IgnoredStore uses the default path when no path is provided."""
+    try:
+        from mealplan_mcp.models.ignored import IgnoredStore
+
+        # Create a store with no path
+        store = IgnoredStore()
+
+        # Verify that it uses the default path
+        expected_path = mealplan_root / "ignored_ingredients.json"
+        assert str(store) == str(expected_path)
+    except ImportError:
+        pytest.skip("Skipping test as implementation doesn't exist yet")
