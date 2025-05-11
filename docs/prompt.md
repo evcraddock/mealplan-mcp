@@ -98,16 +98,19 @@ Add tests ensuring get_ignored_ingredients returns sorted list of strings.
 Implement service; reuse IgnoredStore.load(); tests pass.
 ```
 
-### Prompt 12 – FastMCP Ignored Handlers Contract Tests
+### Prompt 12 – MCP Ignored Tools Contract Tests
 ```text
-Using httpx + FastAPI TestClient, assert:
-POST /mcp/add_ignored {"name":"salt"} -> 200 {"ok":"Saved"}
-GET  /mcp/ignored            -> 200 ["salt"]
+Using MCP test client, assert:
+add_ignored_ingredient({"name":"salt"}) -> {"ok":"Saved"}
+get_ignored_ingredients() -> ["salt"]
 ```
 
-### Prompt 13 – Ignored Handlers Implementation
+### Prompt 13 – MCP Ignored Tools Implementation
 ```text
-Create `mealplan_mcp.api.ignored` router with two endpoints wired to services. Mount at /mcp.
+Create `mealplan_mcp.tools.ignored` providing two MCP tools:
+- add_ignored_ingredient
+- get_ignored_ingredients
+Both properly wired to their respective services.
 ```
 
 ### Prompt 14 – Dish Schema Unit Tests
@@ -144,16 +147,19 @@ Ensure alphabetical natural sort by internal name. Corrupt JSON skipped.
 Implement listing; reuse utils.paths; tests green.
 ```
 
-### Prompt 20 – Dish Endpoints Contract Tests
+### Prompt 20 – MCP Dish Tools Contract Tests
 ```text
 Test:
-POST /mcp/store_dish {...} -> 200 {"ok":"dishes/chili.json"}
-GET  /mcp/list_dishes       -> 200 [...]
+store_dish({...}) -> {"ok":"dishes/chili.json"}
+list_dishes()     -> [...]
 ```
 
-### Prompt 21 – Dish Endpoints Impl
+### Prompt 21 – MCP Dish Tools Implementation
 ```text
-Add router `api.dish` with POST store_dish + GET list_dishes; mount under /mcp.
+Create `mealplan_mcp.tools.dish` providing two MCP tools:
+- store_dish
+- list_dishes
+Both properly wired to their respective services.
 ```
 
 ### Prompt 22 – Markdown Renderer Skeleton Tests
@@ -179,29 +185,39 @@ Service: generate_grocery_list(start,end):
 - Writes file, returns relative path
 ```
 
-### Prompt 26 – Grocery Endpoint Tests
+### Prompt 26 – MCP Grocery List Tool Test
 ```text
-POST /mcp/generate_grocery {"start":"2025-05-10","end":"2025-05-17"} -> 200 {"ok":".../to_...md"}
+generate_grocery_list({"start":"2025-05-10","end":"2025-05-17"}) -> {"ok":".../to_...md"}
 ```
 
-### Prompt 27 – Grocery Endpoint Impl
+### Prompt 27 – MCP Grocery List Tool Implementation
 ```text
-Add api.grocery router exposing generate_grocery_list.
+Create `mealplan_mcp.tools.grocery` providing:
+- generate_grocery_list
+Properly wired to its service.
 ```
 
-### Prompt 28 – Compose FastAPI App Tests
+### Prompt 28 – MCP Server Integration Tests
 ```text
-tests/e2e/test_app.py spins up app, asserts all routers registered.
+tests/e2e/test_mcp.py verifies that:
+- All 5 MCP tools are registered
+- Tools can be called via the MCP protocol
 ```
 
-### Prompt 29 – Compose App Impl
+### Prompt 29 – MCP Server Implementation
 ```text
-Create mealplan_mcp.app with FastAPI instance; include routers; export `app`.
+Create `mealplan_mcp.server` with:
+- MCP server configuration
+- Registration of all 5 tools
+- Export of a runnable MCP server instance
 ```
 
-### Prompt 30 – Integration Smoke Tests
+### Prompt 30 – MCP End-to-End Workflow Tests
 ```text
-Run through full user flow: store dish -> add ignored -> generate grocery list.
+Run through full MCP tool workflow:
+- store_dish with a sample dish
+- add_ignored_ingredient with an ingredient
+- generate_grocery_list using the dish and respecting ignored ingredients
 ```
 
 ### Prompt 31 – Coverage Badge Job
