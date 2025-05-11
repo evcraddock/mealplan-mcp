@@ -98,7 +98,7 @@ Add tests ensuring get_ignored_ingredients returns sorted list of strings.
 Implement service; reuse IgnoredStore.load(); tests pass.
 ```
 
-### Prompt 12 – FastMCP Ignored Tools Contract Tests
+### ✅ Prompt 12 – FastMCP Ignored Tools Contract Tests
 ```text
 Using FastMCP test client, assert:
 add_ignored_ingredient({"name":"salt"}) -> {"ok":"Saved"}
