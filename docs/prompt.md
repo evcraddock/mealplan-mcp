@@ -88,7 +88,7 @@ Implement `mealplan_mcp.services.ignored.add_ingredient(name:str)`:
 Return service file; tests pass.
 ```
 
-### Prompt 10 – get_ignored_ingredients Service Tests
+### ✅ Prompt 10 – get_ignored_ingredients Service Tests
 ```text
 Add tests ensuring get_ignored_ingredients returns sorted list of strings.
 ```
