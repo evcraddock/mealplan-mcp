@@ -93,7 +93,7 @@ Return service file; tests pass.
 Add tests ensuring get_ignored_ingredients returns sorted list of strings.
 ```
 
-### Prompt 11 – get_ignored_ingredients Service Impl
+### ✅ Prompt 11 – get_ignored_ingredients Service Impl
 ```text
 Implement service; reuse IgnoredStore.load(); tests pass.
 ```
