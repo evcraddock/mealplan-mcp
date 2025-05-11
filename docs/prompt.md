@@ -5,15 +5,15 @@ Each is self‑contained, test‑driven, and ends with a green build.
 
 ---
 
-### Prompt 1 – Project Scaffolding
+### ✅ Prompt 1 – Project Scaffolding
 ```text
-You are a senior Python dev.  
-Goal: create project skeleton for "mealplan-mcp".  
+You are a senior Python dev.
+Goal: create project skeleton for "mealplan-mcp".
 Tasks:
 1. Generate a pyproject.toml using uv.
-2. Add deps: fastapi, pydantic, python-slugify, rich.  
-3. Dev-deps: pytest, pytest-cov, ruff, black, pyright, httpx, coverage-badger.  
-4. Create `.pre-commit-config.yaml` with black+ruff hooks.  
+2. Add deps: fastapi, pydantic, python-slugify, rich.
+3. Dev-deps: pytest, pytest-cov, ruff, black, pyright, httpx, coverage-badger.
+4. Create `.pre-commit-config.yaml` with black+ruff hooks.
 Return ONLY the file tree (prefix paths with `📄`), and the contents of pyproject.toml and pre-commit file.
 ```
 
