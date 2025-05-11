@@ -64,7 +64,7 @@ Create `tests/ignored/test_model.py` covering:
 Return test file only.
 ```
 
-### Prompt 7 – Ignored Ingredients Model Impl
+### ✅ Prompt 7 – Ignored Ingredients Model Impl
 ```text
 Implement `mealplan_mcp.models.ignored` with:
 - class IgnoredStore(Path): load(), save(), add(ingredient)
