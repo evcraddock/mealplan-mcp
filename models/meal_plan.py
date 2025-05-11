@@ -1,10 +1,12 @@
 """
 Models for meal planning.
 """
+
 from datetime import datetime
 from typing import TypedDict, List
 from models.meal_type import MealType
 from models.dish import Dish
+
 
 class MealPlan(TypedDict):
     """
@@ -17,6 +19,7 @@ class MealPlan(TypedDict):
         cook: The person who will cook the meal
         dishes: List of dishes to be prepared
     """
+
     date: datetime
     meal_type: MealType
     title: str
