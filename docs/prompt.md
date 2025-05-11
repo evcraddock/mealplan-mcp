@@ -55,7 +55,7 @@ Create `mealplan_mcp.utils.paths` with:
 Write tests for each.
 ```
 
-### Prompt 6 – Ignored Ingredients Model Tests
+### ✅ Prompt 6 – Ignored Ingredients Model Tests
 ```text
 Create `tests/ignored/test_model.py` covering:
 - Loading empty / missing ignored_ingredients.json → []
