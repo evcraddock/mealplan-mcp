@@ -113,7 +113,7 @@ Create `mealplan_mcp.tools.ignored` providing two FastMCP tools:
 Both properly wired to their respective services.
 ```
 
-### Prompt 14 – Dish Schema Unit Tests
+### ✅ Prompt 14 – Dish Schema Unit Tests
 ```text
 Add `tests/dish/test_schema.py`:
 - Valid JSON passes
