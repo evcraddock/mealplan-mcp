@@ -45,6 +45,9 @@ def grocery_path(start_date: str, end_date: str) -> Path:
     Returns:
         Path: The full path to the grocery list markdown file
     """
+    # Get the current mealplan root path from environment
+    current_mealplan_root = Path(os.environ.get("MEALPLANPATH", os.getcwd()))
+
     # Parse start date for directory structure
     start = datetime.strptime(start_date, "%Y-%m-%d")
     year = start.strftime("%Y")
@@ -60,4 +63,4 @@ def grocery_path(start_date: str, end_date: str) -> Path:
         filename = f"{start_date}_to_{end_date}.md"
 
     # Build the full path
-    return mealplan_root / year / f"{month_num}-{month_name}" / filename
+    return current_mealplan_root / year / f"{month_num}-{month_name}" / filename

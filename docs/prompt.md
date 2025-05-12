@@ -177,7 +177,7 @@ Implement per‑dish block respecting order and checkbox format.
 Assert grocery_path("2025-05-10","2025-05-17") returns YYYY/MM-MonthName/2025-05-10_to_2025-05-17.md
 ```
 
-### Prompt 25 – Grocery Generator Impl
+### ✅ Prompt 25 – Grocery Generator Impl
 ```text
 Service: generate_grocery_list(start,end):
 - Reads meal plan JSONs
