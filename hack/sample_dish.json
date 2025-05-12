@@ -1,0 +1,73 @@
+{
+  "name": "Spaghetti Bolognese",
+  "ingredients": [
+    {
+      "name": "ground beef",
+      "amount": "500g"
+    },
+    {
+      "name": "onion",
+      "amount": "1 medium"
+    },
+    {
+      "name": "garlic",
+      "amount": "3 cloves"
+    },
+    {
+      "name": "carrot",
+      "amount": "1 large"
+    },
+    {
+      "name": "celery",
+      "amount": "2 stalks"
+    },
+    {
+      "name": "tomato paste",
+      "amount": "2 tbsp"
+    },
+    {
+      "name": "crushed tomatoes",
+      "amount": "800g"
+    },
+    {
+      "name": "beef stock",
+      "amount": "250ml"
+    },
+    {
+      "name": "red wine",
+      "amount": "100ml"
+    },
+    {
+      "name": "spaghetti",
+      "amount": "400g"
+    },
+    {
+      "name": "parmesan cheese",
+      "amount": "to serve"
+    }
+  ],
+  "instructions": "1. Heat oil in a large pot over medium-high heat. Add ground beef and cook until browned, breaking it up as it cooks. Remove excess fat if needed.\n2. Add onion, garlic, carrot, and celery to the pot. Cook for 5-7 minutes until vegetables soften.\n3. Add tomato paste and cook for 2 minutes until darkened.\n4. Pour in crushed tomatoes, beef stock, and red wine. Add bay leaves, oregano, thyme, salt, and pepper.\n5. Reduce heat to low and simmer for at least 1 hour (preferably 2-3 hours), stirring occasionally.\n6. Cook spaghetti according to package instructions.\n7. Serve the bolognese sauce over the cooked spaghetti, topped with grated parmesan cheese.",
+  "nutrients": [
+    {
+      "name": "calories",
+      "amount": 520,
+      "unit": "kcal"
+    },
+    {
+      "name": "protein",
+      "amount": 32,
+      "unit": "g"
+    },
+    {
+      "name": "carbohydrates",
+      "amount": 60,
+      "unit": "g"
+    },
+    {
+      "name": "fat",
+      "amount": 15,
+      "unit": "g"
+    }
+  ],
+  "tags": ["pasta", "italian", "beef", "dinner"]
+}

@@ -1,5 +1,6 @@
 import os
 import calendar
+import json
 from datetime import datetime
 from mcp.server import FastMCP
 from models.meal_plan import MealPlan
@@ -9,6 +10,13 @@ from mealplan_mcp.services.ignored import (
     add_ingredient,
     get_ignored_ingredients as get_ignored_ingredients_service,
 )
+
+# Import dish services
+from mealplan_mcp.services.dish import (
+    store_dish as store_dish_service,
+    list_dishes as list_dishes_service,
+)
+from mealplan_mcp.models.dish import Dish
 
 # Get the meal plan path from environment variable, default to current directory if not set
 MEALPLAN_PATH = os.environ.get("MEALPLANPATH", os.getcwd())
@@ -43,6 +51,41 @@ def get_ignored_ingredients() -> list:
     """
     # Call the service to get the ingredients
     return get_ignored_ingredients_service()
+
+
+# Add dish tools
+@app.tool()
+async def store_dish(dish_data: dict) -> dict:
+    """Store a dish and return a confirmation.
+
+    Args:
+        dish_data: Dictionary containing dish data
+
+    Returns:
+        Dictionary with a confirmation message including the path where the dish was stored
+    """
+    # Create a Dish object from the data
+    dish = Dish(**dish_data)
+
+    # Store the dish
+    path = store_dish_service(dish)
+
+    # Return a confirmation message
+    return {"ok": str(path)}
+
+
+@app.tool()
+async def list_dishes() -> list:
+    """List all dishes.
+
+    Returns:
+        List of dish objects converted to dictionaries
+    """
+    # Get the dishes
+    dishes = list_dishes_service()
+
+    # Convert to serializable format
+    return [json.loads(dish.model_dump_json()) for dish in dishes]
 
 
 @app.tool()

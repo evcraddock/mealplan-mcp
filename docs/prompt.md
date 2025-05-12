@@ -147,14 +147,14 @@ Ensure alphabetical natural sort by internal name. Corrupt JSON skipped.
 Implement listing; reuse utils.paths; tests green.
 ```
 
-### Prompt 20 – FastMCP Dish Tools Contract Tests
+### ✅ Prompt 20 – FastMCP Dish Tools Contract Tests
 ```text
 Test:
 store_dish({...}) -> {"ok":"dishes/chili.json"}
 list_dishes()     -> [...]
 ```
 
-### Prompt 21 – FastMCP Dish Tools Implementation
+### ✅ Prompt 21 – FastMCP Dish Tools Implementation
 ```text
 Create `mealplan_mcp.tools.dish` providing two FastMCP tools:
 - store_dish
