@@ -162,7 +162,7 @@ Create `mealplan_mcp.tools.dish` providing two FastMCP tools:
 Both properly wired to their respective services.
 ```
 
-### Prompt 22 – Markdown Renderer Skeleton Tests
+### ✅ Prompt 22 – Markdown Renderer Skeleton Tests
 ```text
 Add tests for `mealplan_mcp.renderers.grocery.header(date)` -> "## 2025-05-10"
 ```
@@ -185,39 +185,11 @@ Service: generate_grocery_list(start,end):
 - Writes file, returns relative path
 ```
 
-### Prompt 26 – FastMCP Grocery List Tool Test
-```text
-generate_grocery_list({"start":"2025-05-10","end":"2025-05-17"}) -> {"ok":".../to_...md"}
-```
-
 ### Prompt 27 – FastMCP Grocery List Tool Implementation
 ```text
 Create `mealplan_mcp.tools.grocery` providing:
 - generate_grocery_list
 Properly wired to its service.
-```
-
-### Prompt 28 – FastMCP Server Integration Tests
-```text
-tests/e2e/test_fastmcp.py verifies that:
-- All 5 FastMCP tools are registered
-- Tools can be called via the FastMCP protocol
-```
-
-### Prompt 29 – FastMCP Server Implementation
-```text
-Create `mealplan_mcp.server` with:
-- FastMCP server configuration
-- Registration of all 5 tools
-- Export of a runnable FastMCP server instance
-```
-
-### Prompt 30 – FastMCP End-to-End Workflow Tests
-```text
-Run through full FastMCP tool workflow:
-- store_dish with a sample dish
-- add_ignored_ingredient with an ingredient
-- generate_grocery_list using the dish and respecting ignored ingredients
 ```
 
 ### Prompt 31 – Coverage Badge Job
@@ -227,17 +199,7 @@ Update CI to push coverage badge to README on main.
 
 ### Prompt 32 – README Update
 ```text
-Generate quick‑start, API examples, local dev guide.
-```
-
-### Prompt 33 – CONTRIBUTING & Makefile
-```text
-Add CONTRIBUTING.md with commit style guide; Makefile with common tasks.
-```
-
-### Prompt 34 – Docs Site Build
-```text
-Add MkDocs config, gh-pages deploy workflow.
+Generate quick‑start, MCP examples, local dev guide.
 ```
 
 ### Prompt 35 – Release Automation
