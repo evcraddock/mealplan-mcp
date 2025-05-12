@@ -132,17 +132,17 @@ Add happy‑path: new dish stored to dishes/{slug}.json
 Add collision: second dish same slug gets -1 suffix.
 ```
 
-### Prompt 17 – store_dish Service Impl
+### ✅ Prompt 17 – store_dish Service Impl
 ```text
 Implement `mealplan_mcp.services.dish.store(dish_json)` returning file path. Use atomic write.
 ```
 
-### Prompt 18 – list_dishes Service Tests
+### ✅ Prompt 18 – list_dishes Service Tests
 ```text
 Ensure alphabetical natural sort by internal name. Corrupt JSON skipped.
 ```
 
-### Prompt 19 – list_dishes Service Impl
+### ✅ Prompt 19 – list_dishes Service Impl
 ```text
 Implement listing; reuse utils.paths; tests green.
 ```
