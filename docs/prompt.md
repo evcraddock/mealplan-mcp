@@ -105,7 +105,7 @@ add_ignored_ingredient({"name":"salt"}) -> {"ok":"Saved"}
 get_ignored_ingredients() -> ["salt"]
 ```
 
-### Prompt 13 – FastMCP Ignored Tools Implementation
+### ✅ Prompt 13 – FastMCP Ignored Tools Implementation
 ```text
 Create `mealplan_mcp.tools.ignored` providing two FastMCP tools:
 - add_ignored_ingredient

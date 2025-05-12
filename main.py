@@ -4,10 +4,45 @@ from datetime import datetime
 from mcp.server import FastMCP
 from models.meal_plan import MealPlan
 
+# Import our services for ignored ingredients
+from mealplan_mcp.services.ignored import (
+    add_ingredient,
+    get_ignored_ingredients as get_ignored_ingredients_service,
+)
+
 # Get the meal plan path from environment variable, default to current directory if not set
 MEALPLAN_PATH = os.environ.get("MEALPLANPATH", os.getcwd())
 
 app = FastMCP("mealplan", transport="stdio")
+
+
+# Add ignored ingredients tools
+@app.tool()
+async def add_ignored_ingredient(ingredient: str) -> dict:
+    """Add an ingredient to the ignored ingredients list.
+
+    Args:
+        ingredient: The name of the ingredient to ignore
+
+    Returns:
+        A dictionary with a confirmation message
+    """
+    # Call the service to add the ingredient
+    add_ingredient(ingredient)
+
+    # Return success response
+    return {"ok": "Saved"}
+
+
+@app.tool()
+def get_ignored_ingredients() -> list:
+    """Get the list of ignored ingredients.
+
+    Returns:
+        A sorted list of ingredient names to be ignored in grocery lists
+    """
+    # Call the service to get the ingredients
+    return get_ignored_ingredients_service()
 
 
 @app.tool()
