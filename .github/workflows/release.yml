@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  test-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        # Fetch all history for all tags
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies
+      run: |
+        uv venv
+        source .venv/bin/activate
+        uv pip install -e ".[dev]"
+
+    - name: Run ruff
+      run: |
+        source .venv/bin/activate
+        ruff check .
+
+    - name: Run black check
+      run: |
+        source .venv/bin/activate
+        black --check .
+
+    - name: Run tests with coverage
+      run: |
+        source .venv/bin/activate
+        pytest tests/ --cov=models --cov=mealplan_mcp --cov-report=xml
+
+    - name: Check coverage threshold
+      run: |
+        source .venv/bin/activate
+        COVERAGE=$(python -c "import xml.etree.ElementTree as ET; print(ET.parse('coverage.xml').getroot().get('line-rate'))")
+        COVERAGE_PERCENTAGE=$(python -c "print(float('${COVERAGE}') * 100)")
+        echo "Current coverage: ${COVERAGE_PERCENTAGE}%"
+
+        if (( $(echo "${COVERAGE_PERCENTAGE} < 70" | bc -l) )); then
+          echo "Coverage ${COVERAGE_PERCENTAGE}% is below threshold of 70%"
+          exit 1
+        fi
+
+        echo "Coverage check passed."
+
+    - name: Extract version from pyproject.toml
+      id: extract_version
+      run: |
+        VERSION=$(grep -m 1 'version = ' pyproject.toml | sed -E 's/version = "([^"]+)"/\1/')
+        echo "Package version from pyproject.toml: $VERSION"
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+    - name: Check if version exists as tag
+      id: check_tag
+      run: |
+        if git tag -l "v${{ steps.extract_version.outputs.version }}" | grep -q "v${{ steps.extract_version.outputs.version }}"; then
+          echo "Version ${{ steps.extract_version.outputs.version }} already exists as a tag. Skipping release."
+          echo "tag_exists=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "Version ${{ steps.extract_version.outputs.version }} does not exist as a tag. Will create a release."
+          echo "tag_exists=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Create Release
+      if: steps.check_tag.outputs.tag_exists == 'false'
+      uses: softprops/action-gh-release@v1
+      with:
+        name: v${{ steps.extract_version.outputs.version }}
+        tag_name: v${{ steps.extract_version.outputs.version }}
+        generate_release_notes: true
+        body: |
+          Release v${{ steps.extract_version.outputs.version }} of mealplan-mcp.
+
+          This release was automatically generated using GitHub Actions when the package version was bumped in pyproject.toml.

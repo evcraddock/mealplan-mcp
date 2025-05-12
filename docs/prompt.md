@@ -202,7 +202,7 @@ Update CI to push coverage badge to README on main.
 Generate quick‑start, MCP examples, local dev guide.
 ```
 
-### Prompt 35 – Release Automation
+### ✅ Prompt 35 – Release Automation
 ```text
 Add GitHub Action that tags semantic version on main if tests+coverage pass and pyproject version bumped.
 ```
