@@ -9,6 +9,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - uses: actions/checkout@v4
@@ -42,7 +44,7 @@ jobs:
     - name: Run tests with coverage
       run: |
         source .venv/bin/activate
-        pytest tests/ --cov=models --cov-report=xml
+        pytest tests/ --cov=models --cov=mealplan_mcp --cov-report=xml
 
     - name: Check coverage threshold
       run: |
@@ -55,3 +57,30 @@ jobs:
         #   echo "Coverage ${COVERAGE_PERCENTAGE}% is below threshold of 90%"
         #   exit 1
         # fi
+
+    - name: Generate coverage badge
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        source .venv/bin/activate
+        # Create the badges directory if it doesn't exist
+        mkdir -p badges
+        # Generate the coverage badge
+        coverage-badge -o badges/coverage.svg -f
+
+    - name: Commit coverage badge
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        # Configure git user
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+        # Add the badge to git
+        git add badges/coverage.svg
+
+        # Check if there are changes
+        git diff --staged --quiet badges/coverage.svg || (
+          git commit -m "Update coverage badge [skip ci]" badges/coverage.svg
+
+          # Push the changes
+          git push
+        )

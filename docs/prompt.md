@@ -192,7 +192,7 @@ Create `mealplan_mcp.tools.grocery` providing:
 Properly wired to its service.
 ```
 
-### Prompt 31 – Coverage Badge Job
+### ✅ Prompt 31 – Coverage Badge Job
 ```text
 Update CI to push coverage badge to README on main.
 ```

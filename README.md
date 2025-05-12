@@ -2,6 +2,8 @@
 
 A Model-Centric Programming (MCP) server for meal planning.
 
+![Coverage](./badges/coverage.svg)
+
 ## Development Setup
 
 ### Prerequisites

@@ -21,6 +21,7 @@ dev = [
     "black>=24.0.0",
     "pyright>=1.1.350",
     "httpx>=0.28.1",
+    "coverage-badge>=1.1.0",
 ]
 
 [tool.setuptools]
