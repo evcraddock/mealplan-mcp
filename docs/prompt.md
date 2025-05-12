@@ -126,7 +126,7 @@ Add `tests/dish/test_schema.py`:
 Implement `mealplan_mcp.models.dish.Dish` Pydantic model with clean() + slug property.
 ```
 
-### Prompt 16 – store_dish Service Tests
+### ✅ Prompt 16 – store_dish Service Tests
 ```text
 Add happy‑path: new dish stored to dishes/{slug}.json
 Add collision: second dish same slug gets -1 suffix.
