@@ -167,7 +167,7 @@ Both properly wired to their respective services.
 Add tests for `mealplan_mcp.renderers.grocery.header(date)` -> "## 2025-05-10"
 ```
 
-### Prompt 23 – Renderer Ingredient Expansion Impl
+### ✅ Prompt 23 – Renderer Ingredient Expansion Impl
 ```text
 Implement per‑dish block respecting order and checkbox format.
 ```
