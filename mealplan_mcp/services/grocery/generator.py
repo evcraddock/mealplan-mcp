@@ -7,6 +7,7 @@ grocery lists based on meal plans for a given date range.
 
 import os
 import re
+import json
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any
@@ -124,10 +125,112 @@ def generate_grocery_list(start_date: str, end_date: str) -> str:
 
     # Track which dishes we need for the grocery list
     needed_dishes = []
+    found_dishes_by_name = set()
+
+    # First try to match meal plans to known dishes by name
     for meal_plan in meal_plans:
         dish_name = meal_plan["dish"]
         if dish_name in dish_map:
             needed_dishes.append(dish_map[dish_name])
+            found_dishes_by_name.add(dish_name)
+
+    # If no dishes matched by name, extract ingredients directly from the meal plan files
+    if not needed_dishes:
+        for meal_plan in meal_plans:
+            file_path = meal_plan.get("file_path")
+            if file_path and os.path.exists(file_path):
+                # Read the file content
+                try:
+                    with open(file_path, "r") as f:
+                        content = f.read()
+
+                    # Debug message
+                    print(f"Processing meal plan file: {file_path}")
+
+                    # Look for the Ingredients section - try different patterns
+                    ingredients_match = None
+
+                    # Pattern 1: #### Ingredients followed by lines
+                    pattern1 = r"#+\s*Ingredients\s*\n(.*?)(?:\n#+|$)"
+                    ingredients_match = re.search(pattern1, content, re.DOTALL)
+
+                    # Pattern 2: Ingredients: followed by a list
+                    if not ingredients_match:
+                        pattern2 = r"Ingredients:\s*\n(.*?)(?:\n\n|$)"
+                        ingredients_match = re.search(pattern2, content, re.DOTALL)
+
+                    # Pattern 3: Just try to find bullet points with ingredients
+                    if not ingredients_match:
+                        pattern3 = r"((?:[-*]\s*.*\n)+)"
+                        ingredients_match = re.search(pattern3, content, re.DOTALL)
+
+                    if ingredients_match:
+                        ingredients_text = ingredients_match.group(1).strip()
+                        print(f"Found ingredients section: {ingredients_text}")
+
+                        # Extract ingredients from the lines
+                        ingredient_lines = ingredients_text.split("\n")
+                        ingredients = []
+
+                        for line in ingredient_lines:
+                            line = line.strip()
+                            if not line:
+                                continue
+
+                            try:
+                                # Remove leading bullet points/numbers
+                                clean_line = re.sub(r"^[-*0-9.]\s*", "", line)
+
+                                # Try to split into name and quantity
+                                if ":" in clean_line:
+                                    parts = clean_line.split(":", 1)
+                                    name = parts[0].strip()
+                                    amount = parts[1].strip()
+                                else:
+                                    # Try to extract amount in parentheses
+                                    amount_match = re.search(r"\((.*?)\)", clean_line)
+                                    if amount_match:
+                                        amount = amount_match.group(1)
+                                        name = clean_line.split("(")[0].strip()
+                                    else:
+                                        # Just use the whole line as the name
+                                        name = clean_line
+                                        amount = ""
+
+                                # Create ingredient dict
+                                if name:
+                                    print(f"Extracted ingredient: {name} = {amount}")
+                                    ingredients.append({"name": name, "amount": amount})
+                            except Exception as e:
+                                print(f"Error parsing ingredient line: {line} - {e}")
+
+                        # Create a dish object for this meal plan
+                        if ingredients:
+                            # Create a custom Dish-like object
+                            class CustomDish:
+                                def __init__(self, name, ingredients):
+                                    self.name = name
+                                    self.ingredients = ingredients
+
+                                def model_dump_json(self):
+                                    return json.dumps(
+                                        {
+                                            "name": self.name,
+                                            "ingredients": self.ingredients,
+                                        }
+                                    )
+
+                            dish = CustomDish(meal_plan["dish"], ingredients)
+                            needed_dishes.append(dish)
+                            print(f"Added dish with {len(ingredients)} ingredients")
+                        else:
+                            print(
+                                f"No ingredients found in section for {meal_plan['dish']}"
+                            )
+                    else:
+                        print(f"No ingredients section found in {file_path}")
+                except Exception as e:
+                    print(f"Error processing meal plan file {file_path}: {e}")
 
     # Generate the markdown content
     markdown_lines = []

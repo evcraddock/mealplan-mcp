@@ -185,7 +185,7 @@ Service: generate_grocery_list(start,end):
 - Writes file, returns relative path
 ```
 
-### Prompt 27 – FastMCP Grocery List Tool Implementation
+### ✅ Prompt 27 – FastMCP Grocery List Tool Implementation
 ```text
 Create `mealplan_mcp.tools.grocery` providing:
 - generate_grocery_list

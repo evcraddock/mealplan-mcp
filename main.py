@@ -18,6 +18,11 @@ from mealplan_mcp.services.dish import (
 )
 from mealplan_mcp.models.dish import Dish
 
+# Import grocery services
+from mealplan_mcp.services.grocery import (
+    generate_grocery_list as generate_grocery_list_service,
+)
+
 # Get the meal plan path from environment variable, default to current directory if not set
 MEALPLAN_PATH = os.environ.get("MEALPLANPATH", os.getcwd())
 
@@ -86,6 +91,34 @@ async def list_dishes() -> list:
 
     # Convert to serializable format
     return [json.loads(dish.model_dump_json()) for dish in dishes]
+
+
+# Add grocery list tool
+@app.tool()
+async def generate_grocery_list(date_range: dict) -> dict:
+    """Generate a grocery list for a specified date range.
+
+    Args:
+        date_range: Dictionary containing start and end dates in format YYYY-MM-DD
+            - start: Start date (required)
+            - end: End date (required)
+
+    Returns:
+        Dictionary with the path to the generated grocery list
+    """
+    # Extract start and end dates
+    start_date = date_range.get("start")
+    end_date = date_range.get("end")
+
+    # Validate input
+    if not start_date or not end_date:
+        return {"error": "Both start and end dates are required"}
+
+    # Call the service to generate the grocery list
+    relative_path = generate_grocery_list_service(start_date, end_date)
+
+    # Return success response with the path
+    return {"ok": relative_path}
 
 
 @app.tool()
