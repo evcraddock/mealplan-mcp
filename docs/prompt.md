@@ -121,7 +121,7 @@ Add `tests/dish/test_schema.py`:
 - >100 char name truncated
 ```
 
-### Prompt 15 – Dish Schema Impl
+### ✅ Prompt 15 – Dish Schema Impl
 ```text
 Implement `mealplan_mcp.models.dish.Dish` Pydantic model with clean() + slug property.
 ```

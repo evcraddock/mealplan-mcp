@@ -60,9 +60,9 @@ def test_valid_json():
         "instructions": "Cook pasta. Mix eggs and cheese. Combine.",
     }
 
-    dish = Dish(valid_json)
-    assert dish.data["name"] == "Spaghetti Carbonara"
-    assert len(dish.data["ingredients"]) == 4
+    dish = Dish(**valid_json)
+    assert dish.name == "Spaghetti Carbonara"
+    assert len(dish.ingredients) == 4
 
 
 def test_name_cleaning_and_slug():
@@ -75,7 +75,7 @@ def test_name_cleaning_and_slug():
 
     # Test with leading/trailing whitespace and mixed case
     dish_data = {"name": "  Spätzle & Käse  "}
-    dish = Dish(dish_data)
+    dish = Dish(**dish_data)
 
     # Name should be trimmed but preserve original case
     assert dish.cleaned_name == "Spätzle & Käse"
@@ -96,7 +96,7 @@ def test_long_name_truncation():
     # Create a dish with a very long name
     long_name = "This is a very long dish name " * 10  # 300 characters
     dish_data = {"name": long_name}
-    dish = Dish(dish_data)
+    dish = Dish(**dish_data)
 
     # Check that the cleaned name is truncated to 100 characters
     assert len(dish.cleaned_name) <= 100
@@ -115,7 +115,7 @@ def test_missing_name():
 
     # Create a dish with no name
     dish_data = {"ingredients": [{"name": "Salt", "amount": "1 tsp"}]}
-    dish = Dish(dish_data)
+    dish = Dish(**dish_data)
 
     # Check that a default name is provided
     assert dish.cleaned_name == "Unnamed Dish"
