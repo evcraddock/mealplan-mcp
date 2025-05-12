@@ -122,19 +122,6 @@ async def generate_grocery_list(date_range: dict) -> dict:
 
 
 @app.tool()
-async def hello(message: str) -> str:
-    """A simple tool that returns a hello world message.
-
-    Args:
-        message: The message to return
-
-    Returns:
-        str: A greeting message
-    """
-    return f"Hello {message} from the mealplan MCP server!"
-
-
-@app.tool()
 async def create_mealplan(meal_plan: MealPlan) -> str:
     """Create a meal plan entry with the specified parameters and save it to a file.
 

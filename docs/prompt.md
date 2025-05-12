@@ -197,7 +197,7 @@ Properly wired to its service.
 Update CI to push coverage badge to README on main.
 ```
 
-### Prompt 32 – README Update
+### ✅ Prompt 32 – README Update
 ```text
 Generate quick‑start, MCP examples, local dev guide.
 ```
