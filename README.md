@@ -1,6 +1,6 @@
 # Mealplan MCP
 
-A Model-Centric Programming (MCP) server for meal planning and grocery list generation.
+A MCP server for meal planning and grocery list generation.
 
 ![Coverage](./badges/coverage.svg)
 
