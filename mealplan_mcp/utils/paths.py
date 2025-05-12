@@ -35,6 +35,9 @@ def grocery_path(start_date: str, end_date: str) -> Path:
     The path follows the pattern:
     $MEALPLANPATH/YYYY/MM-MonthName/start_date_to_end_date.md
 
+    If start_date and end_date are the same, the pattern is:
+    $MEALPLANPATH/YYYY/MM-MonthName/date.md
+
     Args:
         start_date: Start date in YYYY-MM-DD format
         end_date: End date in YYYY-MM-DD format
@@ -49,7 +52,12 @@ def grocery_path(start_date: str, end_date: str) -> Path:
     month_name = calendar.month_name[start.month]
 
     # Create the filename
-    filename = f"{start_date}_to_{end_date}.md"
+    if start_date == end_date:
+        # If it's for a single day, just use the date
+        filename = f"{start_date}.md"
+    else:
+        # Otherwise use a date range
+        filename = f"{start_date}_to_{end_date}.md"
 
     # Build the full path
     return mealplan_root / year / f"{month_num}-{month_name}" / filename

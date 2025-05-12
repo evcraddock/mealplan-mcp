@@ -172,7 +172,7 @@ Add tests for `mealplan_mcp.renderers.grocery.header(date)` -> "## 2025-05-10"
 Implement per‑dish block respecting order and checkbox format.
 ```
 
-### Prompt 24 – grocery_path Logic Tests
+### ✅ Prompt 24 – grocery_path Logic Tests
 ```text
 Assert grocery_path("2025-05-10","2025-05-17") returns YYYY/MM-MonthName/2025-05-10_to_2025-05-17.md
 ```
