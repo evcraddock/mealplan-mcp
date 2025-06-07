@@ -17,6 +17,7 @@ from models.meal_type import MealType
 
 
 @pytest.mark.anyio
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
 async def test_create_mealplan_tool_basic(monkeypatch):
     """Test the create_mealplan tool function with basic input."""
     # Import the tool function
@@ -64,6 +65,7 @@ async def test_create_mealplan_tool_basic(monkeypatch):
 
 
 @pytest.mark.anyio
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
 async def test_create_mealplan_tool_with_defaults(monkeypatch):
     """Test the create_mealplan tool with default values."""
     from main import create_mealplan
@@ -122,6 +124,7 @@ async def test_create_mealplan_tool_with_defaults(monkeypatch):
 
 
 @pytest.mark.anyio
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
 async def test_create_mealplan_tool_return_format(monkeypatch):
     """Test that the create_mealplan tool returns the expected format."""
     from main import create_mealplan
