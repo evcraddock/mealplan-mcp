@@ -123,6 +123,39 @@ python main.py
 mcp dev main.py
 ```
 
+### Example: Listing Meal Plans by Date Range
+
+```bash
+# Query meal plans for a specific week
+mcp call list_mealplans_by_date_range '{
+  "date_range": {
+    "start": "2023-06-01",
+    "end": "2023-06-07"
+  }
+}'
+```
+
+This returns a JSON array with meal plan summaries:
+
+```json
+[
+  {
+    "title": "Italian Night",
+    "date": "2023-06-01",
+    "meal_type": "dinner",
+    "cook": "Chef Mario",
+    "dishes": ["Spaghetti Carbonara", "Caesar Salad"]
+  },
+  {
+    "title": "Healthy Breakfast",
+    "date": "2023-06-02",
+    "meal_type": "breakfast",
+    "cook": "Alice",
+    "dishes": ["Oatmeal", "Fresh Fruit"]
+  }
+]
+```
+
 
 
 ## Available Tools
@@ -132,6 +165,7 @@ mcp dev main.py
 | `create_mealplan` | Creates a meal plan | `{"meal_plan": {"date": "2023-05-01", "meal_type": "dinner", "title": "Italian Night", "cook": "Chef", "dishes": [...]}}` |
 | `store_dish` | Stores a dish recipe | `{"dish_data": {"name": "Pasta", "ingredients": [...]}}` |
 | `list_dishes` | Lists all stored dishes | `{}` |
+| `list_mealplans_by_date_range` | Lists meal plans within a date range | `{"date_range": {"start": "2023-06-01", "end": "2023-06-07"}}` |
 | `add_ignored_ingredient` | Adds ingredient to ignore list | `{"ingredient": "salt"}` |
 | `get_ignored_ingredients` | Gets all ignored ingredients | `{}` |
 | `generate_grocery_list` | Creates a grocery list markdown | `{"date_range": {"start": "2023-06-01", "end": "2023-06-07"}}` |
@@ -160,7 +194,7 @@ mealplan-mcp/
 │   └── utils/               # Utility functions
 │       ├── paths.py         # Path handling with test isolation
 │       └── slugify.py       # String slugification utilities
-├── tests/                   # Comprehensive test suite (72 tests)
+├── tests/                   # Comprehensive test suite (91 tests)
 └── docs/                    # Documentation
 ```
 
