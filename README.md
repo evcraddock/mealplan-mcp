@@ -1,6 +1,6 @@
 # Mealplan MCP
 
-A MCP server for meal planning and grocery list generation.
+A Model Context Provider (MCP) server for meal planning and grocery list generation.
 
 ![Coverage](./badges/coverage.svg)
 
@@ -28,7 +28,7 @@ python main.py
 - Create detailed meal plans for specific dates and meal types
 - Manage ignored ingredients that should be excluded from grocery lists
 - Generate grocery lists for date ranges with automatic checkboxes
-- Full MCP (Model-Centric Programming) compatibility for AI-driven interfaces
+- Full MCP (Model Context Provider) compatibility for AI-driven interfaces
 
 ## Development Setup
 
@@ -123,65 +123,6 @@ python main.py
 mcp dev main.py
 ```
 
-### Example: Listing Meal Plans by Date Range
-
-```bash
-# Query meal plans for a specific week
-mcp call list_mealplans_by_date_range '{
-  "date_range": {
-    "start": "2023-06-01",
-    "end": "2023-06-07"
-  }
-}'
-```
-
-This returns a JSON array with meal plan summaries:
-
-```json
-[
-  {
-    "title": "Italian Night",
-    "date": "2023-06-01",
-    "meal_type": "dinner",
-    "cook": "Chef Mario",
-    "dishes": ["Spaghetti Carbonara", "Caesar Salad"]
-  },
-  {
-    "title": "Healthy Breakfast",
-    "date": "2023-06-02",
-    "meal_type": "breakfast",
-    "cook": "Alice",
-    "dishes": ["Oatmeal", "Fresh Fruit"]
-  }
-]
-```
-
-### Example: Exporting Meal Plans to PDF
-
-```bash
-# Export meal plans for a specific month to PDF
-mcp call export_mealplans_to_pdf '{
-  "date_range": {
-    "start": "2023-06-01",
-    "end": "2023-06-30"
-  }
-}'
-```
-
-This returns a JSON response with the path to the generated PDF:
-
-```json
-{
-  "ok": "/path/to/mealplans/exports/mealplans_2023-06-01_to_2023-06-30.pdf"
-}
-```
-
-The generated PDF includes:
-- Professional formatting with headers and styling
-- All meal plans within the date range organized by date
-- Meal details including title, date, meal type, cook, and dishes
-- Proper page breaks for easy printing
-- "No content" message if no meal plans are found
 
 ## Available Tools
 
@@ -234,4 +175,4 @@ mealplan-mcp/
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
