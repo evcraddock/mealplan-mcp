@@ -9,21 +9,8 @@ from typing import List, Optional
 from pydantic import BaseModel, field_validator, ConfigDict, model_validator
 
 from mealplan_mcp.utils.slugify import slugify
-
-
-class Ingredient(BaseModel):
-    """Model for an ingredient in a dish."""
-
-    name: str
-    amount: str
-
-
-class Nutrient(BaseModel):
-    """Model for a nutrient in a dish."""
-
-    name: str
-    amount: float
-    unit: str = ""
+from mealplan_mcp.models.ingredient import Ingredient
+from mealplan_mcp.models.nutrient import Nutrient
 
 
 class Dish(BaseModel):

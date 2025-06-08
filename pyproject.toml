@@ -25,4 +25,4 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = ["models"]
+packages = ["mealplan_mcp"]

@@ -1,6 +1,6 @@
 import json
 from mcp.server import FastMCP
-from models.meal_plan import MealPlan
+from mealplan_mcp.models.meal_plan import MealPlan
 
 # Import our services for ignored ingredients
 from mealplan_mcp.services.ignored import (

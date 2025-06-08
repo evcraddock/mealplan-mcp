@@ -5,8 +5,8 @@ This module provides functions to render meal plans in various markdown formats,
 separating content generation from the business logic.
 """
 
-from models.meal_plan import MealPlan
-from models.dish import Dish
+from mealplan_mcp.models.meal_plan import MealPlan
+from mealplan_mcp.models.dish import Dish
 
 
 def render_mealplan_markdown(meal_plan: MealPlan) -> str:

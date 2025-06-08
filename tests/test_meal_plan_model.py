@@ -4,8 +4,8 @@ Tests for the MealPlan Pydantic model.
 
 from datetime import datetime
 
-from models.meal_plan import MealPlan
-from models.meal_type import MealType
+from mealplan_mcp.models.meal_plan import MealPlan
+from mealplan_mcp.models.meal_type import MealType
 
 
 def test_meal_plan_basic_creation():
