@@ -9,6 +9,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any
 import re
+import markdown
+from html.parser import HTMLParser
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -307,7 +309,7 @@ def _add_markdown_content_to_story(
     markdown_content: str, story: list, styles: dict
 ) -> None:
     """
-    Convert markdown content to PDF elements and add to story.
+    Convert markdown content to PDF elements using proper markdown rendering.
 
     Args:
         markdown_content: Raw markdown content
@@ -324,69 +326,157 @@ def _add_markdown_content_to_story(
         if end_frontmatter > 0:
             content = content[end_frontmatter + 3 :].lstrip("\n")
 
-    # Split into lines for processing
-    lines = content.split("\n")
+    # Convert markdown to HTML
+    html_content = markdown.markdown(content, extensions=["nl2br"])
 
-    for line in lines:
-        line = line.strip()
+    # Parse HTML and convert to PDF elements
+    parser = HTMLToPDFParser(story, styles)
+    parser.feed(html_content)
+    parser.close()
 
-        if not line:
-            story.append(Spacer(1, 6))  # Small space for empty lines
-            continue
 
-        # Handle different markdown elements
-        if line.startswith("# "):
-            # Main heading
-            text = line[2:].strip()
-            story.append(Paragraph(text, styles["Heading1"]))
-        elif line.startswith("## "):
-            # Subheading
-            text = line[3:].strip()
-            story.append(Paragraph(text, styles["Heading2"]))
-        elif line.startswith("### "):
-            # Sub-subheading
-            text = line[4:].strip()
-            story.append(Paragraph(text, styles["Heading3"]))
-        elif line.startswith("- ") or line.startswith("* "):
-            # Bullet point
-            text = line[2:].strip()
-            story.append(Paragraph(f"• {text}", styles["Normal"]))
-        elif line.startswith("1. ") or re.match(r"^\d+\. ", line):
-            # Numbered list
-            text = re.sub(r"^\d+\. ", "", line)
-            story.append(Paragraph(f"• {text}", styles["Normal"]))
-        elif line.startswith("---"):
-            # Horizontal rule
-            story.append(Spacer(1, 12))
-        elif line.startswith("> "):
-            # Blockquote
-            text = line[2:].strip()
-            # Create a blockquote style
+class HTMLToPDFParser(HTMLParser):
+    """Convert HTML to ReportLab PDF elements."""
+
+    def __init__(self, story, styles):
+        super().__init__()
+        self.story = story
+        self.styles = styles
+        self.current_text = ""
+        self.current_tags = []
+        self.list_level = 0
+        self.in_list = False
+
+        # Define custom styles for additional heading levels
+        self.h4_style = ParagraphStyle(
+            "Heading4",
+            parent=styles["Heading3"],
+            fontSize=12,
+            spaceAfter=8,
+            fontName="Helvetica-Bold",
+        )
+
+        self.h5_style = ParagraphStyle(
+            "Heading5",
+            parent=styles["Normal"],
+            fontSize=10,
+            spaceAfter=6,
+            fontName="Helvetica-Bold",
+        )
+
+    def handle_starttag(self, tag, attrs):
+        if tag in ["h1", "h2", "h3", "h4", "h5", "h6"]:
+            self._flush_text()
+            self.current_tags.append(tag)
+        elif tag in ["p", "div"]:
+            self._flush_text()
+            self.current_tags.append(tag)
+        elif tag == "strong" or tag == "b":
+            self.current_text += "<b>"
+            self.current_tags.append("b")
+        elif tag == "em" or tag == "i":
+            self.current_text += "<i>"
+            self.current_tags.append("i")
+        elif tag == "code":
+            self.current_text += '<font face="Courier">'
+            self.current_tags.append("code")
+        elif tag == "ul" or tag == "ol":
+            self._flush_text()
+            self.in_list = True
+            self.list_level += 1
+        elif tag == "li":
+            self._flush_text()
+            self.current_text = "• "
+            self.current_tags.append("li")
+        elif tag == "blockquote":
+            self._flush_text()
+            self.current_tags.append("blockquote")
+        elif tag == "hr":
+            self._flush_text()
+            self.story.append(Spacer(1, 12))
+        elif tag == "br":
+            self.current_text += "<br/>"
+
+    def handle_endtag(self, tag):
+        if tag in ["h1", "h2", "h3", "h4", "h5", "h6"]:
+            self._flush_text(tag)
+            if tag in self.current_tags:
+                self.current_tags.remove(tag)
+        elif tag in ["p", "div"]:
+            self._flush_text()
+            if tag in self.current_tags:
+                self.current_tags.remove(tag)
+        elif tag == "strong" or tag == "b":
+            self.current_text += "</b>"
+            if "b" in self.current_tags:
+                self.current_tags.remove("b")
+        elif tag == "em" or tag == "i":
+            self.current_text += "</i>"
+            if "i" in self.current_tags:
+                self.current_tags.remove("i")
+        elif tag == "code":
+            self.current_text += "</font>"
+            if "code" in self.current_tags:
+                self.current_tags.remove("code")
+        elif tag == "ul" or tag == "ol":
+            self._flush_text()
+            self.in_list = False
+            self.list_level = max(0, self.list_level - 1)
+        elif tag == "li":
+            self._flush_text()
+            if "li" in self.current_tags:
+                self.current_tags.remove("li")
+        elif tag == "blockquote":
+            self._flush_text("blockquote")
+            if "blockquote" in self.current_tags:
+                self.current_tags.remove("blockquote")
+
+    def handle_data(self, data):
+        self.current_text += data
+
+    def _flush_text(self, element_type=None):
+        if not self.current_text.strip():
+            return
+
+        text = self.current_text.strip()
+
+        if element_type in ["h1", "h2", "h3", "h4", "h5", "h6"]:
+            # Map heading levels to styles
+            if element_type == "h1":
+                style = self.styles["Heading1"]
+            elif element_type == "h2":
+                style = self.styles["Heading2"]
+            elif element_type == "h3":
+                style = self.styles["Heading3"]
+            elif element_type == "h4":
+                style = self.h4_style
+            else:  # h5, h6
+                style = self.h5_style
+            self.story.append(Paragraph(text, style))
+        elif element_type == "blockquote":
             blockquote_style = ParagraphStyle(
                 "Blockquote",
-                parent=styles["Normal"],
+                parent=self.styles["Normal"],
                 leftIndent=20,
                 rightIndent=20,
                 fontName="Helvetica-Oblique",
                 fontSize=10,
                 textColor=colors.grey,
             )
-            story.append(Paragraph(text, blockquote_style))
+            self.story.append(Paragraph(text, blockquote_style))
+        elif "li" in self.current_tags:
+            # List item
+            self.story.append(Paragraph(text, self.styles["Normal"]))
         else:
             # Regular paragraph
-            # Handle basic markdown formatting
-            text = line
-            # Convert **bold** to <b>bold</b>
-            text = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", text)
-            # Convert *italic* to <i>italic</i>
-            text = re.sub(r"\*(.*?)\*", r"<i>\1</i>", text)
-            # Convert `code` to monospace
-            text = re.sub(r"`(.*?)`", r'<font face="Courier">\1</font>', text)
-            # Convert [link text](url) to just link text (since PDFs don't handle links well in this context)
-            text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
+            if text:
+                self.story.append(Paragraph(text, self.styles["Normal"]))
 
-            if text.strip():
-                story.append(Paragraph(text, styles["Normal"]))
+        self.current_text = ""
+
+    def close(self):
+        self._flush_text()
+        super().close()
 
 
 def _load_meal_plan_markdown(meal_plan_path: Path) -> str:
