@@ -8,14 +8,137 @@ document containing all meal plan details with proper formatting.
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any
+import re
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
 from reportlab.lib.units import inch
 
-from mealplan_mcp.services.mealplan.list_service import list_mealplans_by_date_range
-from mealplan_mcp.utils.paths import pdf_export_path
+from mealplan_mcp.utils.paths import pdf_export_path, mealplan_root
+
+
+def get_mealplan_files_with_content(
+    start_date: str, end_date: str
+) -> List[Dict[str, Any]]:
+    """
+    Get meal plan files with their full markdown content within a date range.
+
+    Args:
+        start_date: Start date in YYYY-MM-DD format
+        end_date: End date in YYYY-MM-DD format
+
+    Returns:
+        List of dictionaries with meal plan metadata and full markdown content
+    """
+    try:
+        start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+        end_dt = datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError as e:
+        raise ValueError(f"Invalid date format. Expected YYYY-MM-DD: {e}")
+
+    if end_dt < start_dt:
+        return []
+
+    meal_plans = []
+    current_mealplan_root = Path(mealplan_root)
+
+    if not current_mealplan_root.exists():
+        return []
+
+    # Walk through the directory structure
+    for year_dir in current_mealplan_root.iterdir():
+        if not year_dir.is_dir() or not year_dir.name.isdigit():
+            continue
+
+        for month_dir in year_dir.iterdir():
+            if not month_dir.is_dir():
+                continue
+
+            for date_dir in month_dir.iterdir():
+                if not date_dir.is_dir():
+                    continue
+
+                # Extract date from directory name (MM-DD-YYYY)
+                date_match = re.match(r"(\d{2})-(\d{2})-(\d{4})", date_dir.name)
+                if not date_match:
+                    continue
+
+                month, day, year = date_match.groups()
+                try:
+                    file_date = datetime(int(year), int(month), int(day))
+                except ValueError:
+                    continue
+
+                # Check if date is within our range
+                if start_dt <= file_date <= end_dt:
+                    # Find all .md files in this directory
+                    for md_file in date_dir.glob("*.md"):
+                        # Extract meal type from filename
+                        filename_match = re.match(
+                            r"\d{2}-\d{2}-\d{4}-(.+)\.md$", md_file.name
+                        )
+                        if filename_match:
+                            meal_type = filename_match.group(1)
+
+                            # Load the full markdown content
+                            markdown_content = _load_meal_plan_markdown(md_file)
+
+                            # Extract title from markdown content (first heading or filename)
+                            title = _extract_title_from_markdown(
+                                markdown_content, md_file.stem
+                            )
+
+                            meal_plans.append(
+                                {
+                                    "title": title,
+                                    "date": file_date.strftime("%Y-%m-%d"),
+                                    "meal_type": meal_type,
+                                    "markdown_content": markdown_content,
+                                    "file_path": str(md_file),
+                                }
+                            )
+
+    # Sort by date, then by meal type, then by title
+    meal_plans.sort(key=lambda x: (x["date"], x["meal_type"], x["title"]))
+    return meal_plans
+
+
+def _extract_title_from_markdown(content: str, fallback: str) -> str:
+    """
+    Extract title from markdown content, falling back to filename.
+
+    Args:
+        content: Markdown content
+        fallback: Fallback title if none found
+
+    Returns:
+        Extracted or fallback title
+    """
+    if not content.strip():
+        return fallback
+
+    # Look for first heading (# Title)
+    lines = content.split("\n")
+    for line in lines:
+        line = line.strip()
+        if line.startswith("# "):
+            title = line[2:].strip()
+            if title:
+                return title
+
+    # Look for front matter title
+    if content.startswith("---"):
+        front_matter_end = content.find("---", 3)
+        if front_matter_end > 0:
+            front_matter = content[3:front_matter_end]
+            for line in front_matter.split("\n"):
+                if line.strip().startswith("title:"):
+                    title = line.split(":", 1)[1].strip().strip("\"'")
+                    if title:
+                        return title
+
+    return fallback
 
 
 def export_mealplans_to_pdf(start_date: str, end_date: str) -> Path:
@@ -39,8 +162,8 @@ def export_mealplans_to_pdf(start_date: str, end_date: str) -> Path:
     except ValueError as e:
         raise ValueError(f"Invalid date format. Please use YYYY-MM-DD format: {e}")
 
-    # Get meal plans for the date range
-    meal_plans = list_mealplans_by_date_range(start_date, end_date)
+    # Get meal plans with full markdown content for the date range
+    meal_plans = get_mealplan_files_with_content(start_date, end_date)
 
     # Generate PDF path using the same directory structure as meal plans
     pdf_path = pdf_export_path(start_date, end_date)
@@ -158,16 +281,18 @@ def _generate_pdf_with_reportlab(
 
                     # Add meal metadata
                     meal_type = meal["meal_type"].title()
-                    meta_text = f"<b>Date:</b> {formatted_date} | <b>Meal:</b> {meal_type} | <b>Cook:</b> {meal['cook']}"
+                    meta_text = (
+                        f"<b>Date:</b> {formatted_date} | <b>Meal:</b> {meal_type}"
+                    )
                     story.append(Paragraph(meta_text, meal_meta_style))
 
-                    # Add dishes
-                    if meal["dishes"]:
-                        story.append(Paragraph("<b>Dishes:</b>", styles["Heading3"]))
-                        for dish in meal["dishes"]:
-                            dish_text = f"• {dish}"
-                            story.append(Paragraph(dish_text, styles["Normal"]))
-                        story.append(Spacer(1, 0.3 * inch))
+                    # Add the full markdown content
+                    if meal.get("markdown_content"):
+                        story.append(Spacer(1, 0.2 * inch))
+                        # Convert markdown to HTML and then to PDF paragraphs
+                        _add_markdown_content_to_story(
+                            meal["markdown_content"], story, styles
+                        )
 
                     story.append(Spacer(1, 0.5 * inch))
 
@@ -176,6 +301,92 @@ def _generate_pdf_with_reportlab(
 
     except Exception as e:
         raise Exception(f"Failed to generate PDF: {e}")
+
+
+def _add_markdown_content_to_story(
+    markdown_content: str, story: list, styles: dict
+) -> None:
+    """
+    Convert markdown content to PDF elements and add to story.
+
+    Args:
+        markdown_content: Raw markdown content
+        story: ReportLab story list to append to
+        styles: ReportLab styles dictionary
+    """
+    if not markdown_content.strip():
+        return
+
+    # Remove YAML front matter if present
+    content = markdown_content
+    if content.startswith("---"):
+        end_frontmatter = content.find("---", 3)
+        if end_frontmatter > 0:
+            content = content[end_frontmatter + 3 :].lstrip("\n")
+
+    # Split into lines for processing
+    lines = content.split("\n")
+
+    for line in lines:
+        line = line.strip()
+
+        if not line:
+            story.append(Spacer(1, 6))  # Small space for empty lines
+            continue
+
+        # Handle different markdown elements
+        if line.startswith("# "):
+            # Main heading
+            text = line[2:].strip()
+            story.append(Paragraph(text, styles["Heading1"]))
+        elif line.startswith("## "):
+            # Subheading
+            text = line[3:].strip()
+            story.append(Paragraph(text, styles["Heading2"]))
+        elif line.startswith("### "):
+            # Sub-subheading
+            text = line[4:].strip()
+            story.append(Paragraph(text, styles["Heading3"]))
+        elif line.startswith("- ") or line.startswith("* "):
+            # Bullet point
+            text = line[2:].strip()
+            story.append(Paragraph(f"• {text}", styles["Normal"]))
+        elif line.startswith("1. ") or re.match(r"^\d+\. ", line):
+            # Numbered list
+            text = re.sub(r"^\d+\. ", "", line)
+            story.append(Paragraph(f"• {text}", styles["Normal"]))
+        elif line.startswith("---"):
+            # Horizontal rule
+            story.append(Spacer(1, 12))
+        elif line.startswith("> "):
+            # Blockquote
+            text = line[2:].strip()
+            # Create a blockquote style
+            blockquote_style = ParagraphStyle(
+                "Blockquote",
+                parent=styles["Normal"],
+                leftIndent=20,
+                rightIndent=20,
+                fontName="Helvetica-Oblique",
+                fontSize=10,
+                textColor=colors.grey,
+            )
+            story.append(Paragraph(text, blockquote_style))
+        else:
+            # Regular paragraph
+            # Handle basic markdown formatting
+            text = line
+            # Convert **bold** to <b>bold</b>
+            text = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", text)
+            # Convert *italic* to <i>italic</i>
+            text = re.sub(r"\*(.*?)\*", r"<i>\1</i>", text)
+            # Convert `code` to monospace
+            text = re.sub(r"`(.*?)`", r'<font face="Courier">\1</font>', text)
+            # Convert [link text](url) to just link text (since PDFs don't handle links well in this context)
+            text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
+
+            if text.strip():
+                story.append(Paragraph(text, styles["Normal"]))
 
 
 def _load_meal_plan_markdown(meal_plan_path: Path) -> str:

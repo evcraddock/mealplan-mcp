@@ -66,6 +66,12 @@ def _setup_test_environment(monkeypatch, temp_dir):
         mock_pdf_export_path,
     )
 
+    # Mock mealplan_root for the new get_mealplan_files_with_content function
+    monkeypatch.setattr(
+        "mealplan_mcp.services.mealplan.pdf_export_service.mealplan_root",
+        Path(temp_dir),
+    )
+
     # Mock the path functions for store service
     def mock_mealplan_directory_path(date):
         year = date.strftime("%Y")
