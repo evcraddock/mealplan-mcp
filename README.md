@@ -91,17 +91,22 @@ This starts the server using stdio transport, making it compatible with MCP clie
 
 ### Testing
 
-Run the test suite:
+The project includes comprehensive testing with automatic test isolation:
 
 ```bash
 # Run all tests
 pytest
 
 # Run with coverage
-pytest --cov=models --cov=mealplan_mcp
+pytest --cov=mealplan_mcp
 
 # Generate a coverage report
-pytest --cov=models --cov=mealplan_mcp --cov-report=html
+pytest --cov=mealplan_mcp --cov-report=html
+
+# Run specific test categories
+pytest tests/mealplan/          # Meal plan tests
+pytest tests/dish/              # Dish service tests
+pytest tests/renderers/         # Renderer tests
 ```
 
 ## MCP Examples
@@ -118,46 +123,7 @@ python main.py
 mcp dev main.py
 ```
 
-### Using Python Client
 
-```python
-import asyncio
-from mcp.client import Client
-
-async def main():
-    # Connect to your MCP server
-    client = Client(transport="subprocess", command=["python", "main.py"])
-
-    # Example 1: Store a dish
-    dish_data = {
-        "name": "Spaghetti Carbonara",
-        "ingredients": [
-            {"name": "spaghetti", "amount": "200g"},
-            {"name": "eggs", "amount": "2"},
-            {"name": "pecorino cheese", "amount": "50g"},
-            {"name": "pancetta", "amount": "100g"},
-            {"name": "black pepper", "amount": "to taste"}
-        ],
-        "instructions": "1. Cook pasta\n2. Fry pancetta\n3. Mix eggs and cheese\n4. Combine all ingredients"
-    }
-    result = await client.call("store_dish", {"dish_data": dish_data})
-    print(f"Dish stored: {result}")
-
-    # Example 2: Add ignored ingredient
-    result = await client.call("add_ignored_ingredient", {"ingredient": "salt"})
-    print(f"Ignored ingredient: {result}")
-
-    # Example 3: Generate grocery list
-    date_range = {"start": "2023-06-01", "end": "2023-06-07"}
-    result = await client.call("generate_grocery_list", {"date_range": date_range})
-    print(f"Grocery list: {result}")
-
-    # Close the client
-    await client.close()
-
-# Run the async function
-asyncio.run(main())
-```
 
 ## Available Tools
 
@@ -175,25 +141,27 @@ asyncio.run(main())
 ```
 mealplan-mcp/
 ├── main.py                  # Entry point and MCP server definition
-├── models/                  # Core data models
-│   ├── dish.py              # Dish model
-│   ├── ingredient.py        # Ingredient model
-│   ├── meal_plan.py         # Meal plan model
-│   ├── meal_type.py         # Meal type enumerations
-│   └── nutrient.py          # Nutrient information model
-├── mealplan_mcp/            # Main application code
-│   ├── models/              # Extended models
-│   │   └── ignored.py       # Ignored ingredients model
-│   ├── renderers/           # Markdown renderers
-│   │   └── grocery.py       # Grocery list markdown renderer
+├── mealplan_mcp/            # Main application package
+│   ├── models/              # Pydantic data models
+│   │   ├── dish.py          # Dish model with ingredients and instructions
+│   │   ├── ingredient.py    # Ingredient model with validation
+│   │   ├── ignored.py       # Ignored ingredients model
+│   │   ├── meal_plan.py     # Meal plan model with date validation
+│   │   ├── meal_type.py     # Meal type enumerations
+│   │   └── nutrient.py      # Nutrient information model
+│   ├── renderers/           # Markdown rendering modules
+│   │   ├── grocery.py       # Grocery list markdown renderer
+│   │   └── mealplan.py      # Meal plan markdown renderer
 │   ├── services/            # Business logic services
-│   │   ├── dish/            # Dish-related services
-│   │   ├── grocery/         # Grocery list services
-│   │   └── ignored/         # Ignored ingredients services
+│   │   ├── dish/            # Dish-related services (store, list)
+│   │   ├── grocery/         # Grocery list generation services
+│   │   ├── ignored/         # Ignored ingredients services
+│   │   └── mealplan/        # Meal plan storage services
 │   └── utils/               # Utility functions
-│       ├── paths.py         # Path handling utilities
-│       └── slugify.py       # String slugification
-└── tests/                   # Test suite
+│       ├── paths.py         # Path handling with test isolation
+│       └── slugify.py       # String slugification utilities
+├── tests/                   # Comprehensive test suite (72 tests)
+└── docs/                    # Documentation
 ```
 
 ## Contributing
