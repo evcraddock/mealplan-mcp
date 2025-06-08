@@ -35,19 +35,26 @@ def test_store_new_mealplan(monkeypatch):
             dishes=[],
         )
 
-        # Mock the mealplan_directory_path function to point to temp directory
+        # Mock the path functions to point to temp directory
         def mock_mealplan_directory_path(date):
             return Path(temp_dir) / "2023" / "06-June" / "06-15-2023"
 
-        # Replace the path function in the store module
+        def mock_mealplan_path(date, meal_type):
+            return mock_mealplan_directory_path(date) / f"06-15-2023-{meal_type}.md"
+
+        # Replace the path functions in the store module
         monkeypatch.setattr(
             "mealplan_mcp.services.mealplan.store.mealplan_directory_path",
             mock_mealplan_directory_path,
         )
+        monkeypatch.setattr(
+            "mealplan_mcp.services.mealplan.store.mealplan_path",
+            mock_mealplan_path,
+        )
 
         # Get expected paths
         expected_dir = mock_mealplan_directory_path(date)
-        expected_path = expected_dir / "dinner.md"
+        expected_path = expected_dir / "06-15-2023-dinner.md"
 
         # Call the service
         result_path = store_mealplan(meal_plan)
@@ -88,14 +95,21 @@ def test_store_mealplan_with_collision(monkeypatch):
             dishes=[],
         )
 
-        # Mock the mealplan_directory_path function
+        # Mock the path functions
         def mock_mealplan_directory_path(date):
             return Path(temp_dir) / "2023" / "06-June" / "06-15-2023"
 
-        # Replace the path function
+        def mock_mealplan_path(date, meal_type):
+            return mock_mealplan_directory_path(date) / f"06-15-2023-{meal_type}.md"
+
+        # Replace the path functions
         monkeypatch.setattr(
             "mealplan_mcp.services.mealplan.store.mealplan_directory_path",
             mock_mealplan_directory_path,
+        )
+        monkeypatch.setattr(
+            "mealplan_mcp.services.mealplan.store.mealplan_path",
+            mock_mealplan_path,
         )
 
         # Store the first meal plan
@@ -107,8 +121,8 @@ def test_store_mealplan_with_collision(monkeypatch):
 
         # Check that both files exist
         expected_dir = mock_mealplan_directory_path(date)
-        expected_path1 = expected_dir / "dinner.md"
-        expected_path2 = expected_dir / "dinner-1.md"
+        expected_path1 = expected_dir / "06-15-2023-dinner.md"
+        expected_path2 = expected_dir / "06-15-2023-dinner-1.md"
 
         assert expected_path1.exists()
         assert expected_path2.exists()
@@ -140,14 +154,21 @@ def test_store_mealplan_creates_directory_structure(monkeypatch):
             dishes=[],
         )
 
-        # Mock the mealplan_directory_path function
+        # Mock the path functions
         def mock_mealplan_directory_path(date):
             return Path(temp_dir) / "2023" / "12-December" / "12-25-2023"
 
-        # Replace the path function
+        def mock_mealplan_path(date, meal_type):
+            return mock_mealplan_directory_path(date) / f"12-25-2023-{meal_type}.md"
+
+        # Replace the path functions
         monkeypatch.setattr(
             "mealplan_mcp.services.mealplan.store.mealplan_directory_path",
             mock_mealplan_directory_path,
+        )
+        monkeypatch.setattr(
+            "mealplan_mcp.services.mealplan.store.mealplan_path",
+            mock_mealplan_path,
         )
 
         # The directory shouldn't exist initially
@@ -162,7 +183,7 @@ def test_store_mealplan_creates_directory_structure(monkeypatch):
         assert expected_dir.is_dir()
 
         # Check that the file was created
-        expected_path = expected_dir / "breakfast.md"
+        expected_path = expected_dir / "12-25-2023-breakfast.md"
         assert result_path == expected_path
         assert expected_path.exists()
 
@@ -183,14 +204,21 @@ def test_store_mealplan_different_meal_types(monkeypatch):
             MealPlan(date=date, meal_type=MealType.SNACK, title="Snack", cook="Cook"),
         ]
 
-        # Mock the mealplan_directory_path function
+        # Mock the path functions
         def mock_mealplan_directory_path(date):
             return Path(temp_dir) / "2023" / "06-June" / "06-15-2023"
 
-        # Replace the path function
+        def mock_mealplan_path(date, meal_type):
+            return mock_mealplan_directory_path(date) / f"06-15-2023-{meal_type}.md"
+
+        # Replace the path functions
         monkeypatch.setattr(
             "mealplan_mcp.services.mealplan.store.mealplan_directory_path",
             mock_mealplan_directory_path,
+        )
+        monkeypatch.setattr(
+            "mealplan_mcp.services.mealplan.store.mealplan_path",
+            mock_mealplan_path,
         )
 
         # Store all meal plans
@@ -200,7 +228,12 @@ def test_store_mealplan_different_meal_types(monkeypatch):
 
         # Check that all files were created with correct names
         expected_dir = mock_mealplan_directory_path(date)
-        expected_files = ["breakfast.md", "lunch.md", "dinner.md", "snack.md"]
+        expected_files = [
+            "06-15-2023-breakfast.md",
+            "06-15-2023-lunch.md",
+            "06-15-2023-dinner.md",
+            "06-15-2023-snack.md",
+        ]
 
         for expected_file in expected_files:
             expected_path = expected_dir / expected_file
@@ -221,7 +254,7 @@ def test_store_mealplan_with_default_values(monkeypatch):
             # Using default title and cook
         )
 
-        # Mock the mealplan_directory_path function
+        # Mock the path functions
         def mock_mealplan_directory_path(date):
             year = date.strftime("%Y")
             month_num = date.strftime("%m")
@@ -248,10 +281,20 @@ def test_store_mealplan_with_default_values(monkeypatch):
                 / f"{month_num}-{day}-{year}"
             )
 
-        # Replace the path function
+        def mock_mealplan_path(date, meal_type):
+            date_str = (
+                f"{date.strftime('%m')}-{date.strftime('%d')}-{date.strftime('%Y')}"
+            )
+            return mock_mealplan_directory_path(date) / f"{date_str}-{meal_type}.md"
+
+        # Replace the path functions
         monkeypatch.setattr(
             "mealplan_mcp.services.mealplan.store.mealplan_directory_path",
             mock_mealplan_directory_path,
+        )
+        monkeypatch.setattr(
+            "mealplan_mcp.services.mealplan.store.mealplan_path",
+            mock_mealplan_path,
         )
 
         # Store the meal plan

@@ -33,7 +33,7 @@ def mealplan_path(date: datetime, meal_type: str) -> Path:
     Generate the path for a meal plan based on date and meal type.
 
     The path follows the pattern:
-    $MEALPLANPATH/YYYY/MM-MonthName/MM-DD-YYYY/meal_type.md
+    $MEALPLANPATH/YYYY/MM-MonthName/MM-DD-YYYY/MM-DD-YYYY-meal_type.md
 
     Args:
         date: The date for the meal plan
@@ -55,8 +55,8 @@ def mealplan_path(date: datetime, meal_type: str) -> Path:
     date_dir = f"{month_num}-{day}-{year}"
     dir_path = current_mealplan_root / year / f"{month_num}-{month_name}" / date_dir
 
-    # Create file path: meal_type.md
-    return dir_path / f"{meal_type}.md"
+    # Create file path: MM-DD-YYYY-meal_type.md
+    return dir_path / f"{date_dir}-{meal_type}.md"
 
 
 def mealplan_directory_path(date: datetime) -> Path:

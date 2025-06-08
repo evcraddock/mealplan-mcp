@@ -25,14 +25,21 @@ async def test_create_mealplan_tool_basic(monkeypatch):
 
     # Create a temp directory to use as the meal plan storage
     with tempfile.TemporaryDirectory() as temp_dir:
-        # Mock the mealplan_directory_path function
+        # Mock the path functions
         def mock_mealplan_directory_path(date):
             return Path(temp_dir) / "2023" / "06-June" / "06-15-2023"
 
-        # Replace the path function in the store module
+        def mock_mealplan_path(date, meal_type):
+            return mock_mealplan_directory_path(date) / f"06-15-2023-{meal_type}.md"
+
+        # Replace the path functions in the store module
         monkeypatch.setattr(
             "mealplan_mcp.services.mealplan.store.mealplan_directory_path",
             mock_mealplan_directory_path,
+        )
+        monkeypatch.setattr(
+            "mealplan_mcp.services.mealplan.store.mealplan_path",
+            mock_mealplan_path,
         )
 
         # Create a test meal plan
@@ -60,7 +67,7 @@ async def test_create_mealplan_tool_basic(monkeypatch):
 
         # Check that the file was actually created
         expected_dir = mock_mealplan_directory_path(date)
-        expected_file = expected_dir / "dinner.md"
+        expected_file = expected_dir / "06-15-2023-dinner.md"
         assert expected_file.exists()
 
 

@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Set
 
 from models.meal_plan import MealPlan
-from mealplan_mcp.utils.paths import mealplan_directory_path
+from mealplan_mcp.utils.paths import mealplan_directory_path, mealplan_path
 from mealplan_mcp.renderers.mealplan import render_mealplan_markdown
 from mealplan_mcp.utils.slugify import suffix_if_exists
 
@@ -29,19 +29,20 @@ def store_mealplan(meal_plan: MealPlan) -> Path:
     Returns:
         The path to the stored meal plan file
     """
-    # Get the meal type as string
-    meal_type_str = meal_plan.meal_type.value
+    # Get the primary file path using the utility function
+    primary_path = mealplan_path(meal_plan.date, meal_plan.meal_type.value)
 
     # Get all existing meal plan files for this date
     existing_files = _get_existing_mealplan_files(meal_plan.date)
 
-    # Check if the basic filename already exists
-    base_filename = f"{meal_type_str}.md"
+    # Check if the primary file already exists
+    primary_filename = primary_path.name
 
     # If the file exists, append a suffix to the base name (before extension)
-    if base_filename in existing_files:
-        # Extract base name and extension
-        base_name = meal_type_str
+    if primary_filename in existing_files:
+        # Extract base name and extension from the primary filename
+        # For "06-15-2023-dinner.md", we want to suffix "06-15-2023-dinner"
+        base_name = primary_filename.replace(".md", "")
         extension = ".md"
 
         # Get existing base names (without extension) for suffix checking
@@ -52,24 +53,23 @@ def store_mealplan(meal_plan: MealPlan) -> Path:
         # Find a unique base name
         final_base_name = suffix_if_exists(base_name, existing_base_names)
         final_filename = f"{final_base_name}{extension}"
-    else:
-        final_filename = base_filename
 
-    # Get the directory path for this date
-    dir_path = mealplan_directory_path(meal_plan.date)
+        # Create the final path in the same directory
+        file_path = primary_path.parent / final_filename
+    else:
+        file_path = primary_path
 
     # Ensure the parent directory exists
-    dir_path.mkdir(parents=True, exist_ok=True)
-
-    # Get the final file path
-    file_path = dir_path / final_filename
+    file_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Generate the markdown content
     markdown_content = render_mealplan_markdown(meal_plan)
 
     # Use atomic write to ensure the file is either completely written or not at all
     # This prevents corrupted files if the process is interrupted during writing
-    with tempfile.NamedTemporaryFile(mode="w", delete=False, dir=dir_path) as tf:
+    with tempfile.NamedTemporaryFile(
+        mode="w", delete=False, dir=file_path.parent
+    ) as tf:
         # Write meal plan data to the temporary file
         tf.write(markdown_content)
 
