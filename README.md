@@ -30,6 +30,58 @@ python main.py
 - Generate grocery lists for date ranges with automatic checkboxes
 - Full MCP (Model Context Provider) compatibility for AI-driven interfaces
 
+## Available Tools
+
+| Tool | Description | Example Input |
+|------|-------------|--------------|
+| `create_mealplan` | Creates a meal plan | `{"meal_plan": {"date": "2023-05-01", "meal_type": "dinner", "title": "Italian Night", "cook": "Chef", "dishes": [...]}}` |
+| `store_dish` | Stores a dish recipe | `{"dish_data": {"name": "Pasta", "ingredients": [...]}}` |
+| `list_dishes` | Lists all stored dishes | `{}` |
+| `list_mealplans_by_date_range` | Lists meal plans within a date range | `{"date_range": {"start": "2023-06-01", "end": "2023-06-07"}}` |
+| `export_mealplans_to_pdf` | Exports meal plans to a PDF file | `{"date_range": {"start": "2023-06-01", "end": "2023-06-07"}}` |
+| `add_ignored_ingredient` | Adds ingredient to ignore list | `{"ingredient": "salt"}` |
+| `get_ignored_ingredients` | Gets all ignored ingredients | `{}` |
+| `generate_grocery_list` | Creates a grocery list markdown | `{"date_range": {"start": "2023-06-01", "end": "2023-06-07"}}` |
+
+## Claude Desktop Setup
+
+To use this MCP server with Claude Desktop, add the following configuration to your `claude_desktop_config.json` file:
+
+### macOS
+```bash
+# Edit the config file
+open ~/Library/Application\ Support/Claude/claude_desktop_config.json
+```
+
+### Windows
+```bash
+# Navigate to the config file location
+%APPDATA%\Claude\claude_desktop_config.json
+```
+
+### Configuration
+
+Add this server configuration to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "mealplan": {
+      "command": "python",
+      "args": ["/path/to/your/mealplan-mcp/main.py"],
+      "env": {
+        "MEALPLANPATH": "/path/to/your/meal/plans"
+      }
+    }
+  }
+}
+```
+
+**Important**:
+- Replace `/path/to/your/mealplan-mcp/main.py` with the actual path to your `main.py` file
+- Replace `/path/to/your/meal/plans` with your desired meal plan storage directory
+- Restart Claude Desktop after making changes
+
 ## Development Setup
 
 ### Prerequisites
@@ -123,19 +175,6 @@ python main.py
 mcp dev main.py
 ```
 
-
-## Available Tools
-
-| Tool | Description | Example Input |
-|------|-------------|--------------|
-| `create_mealplan` | Creates a meal plan | `{"meal_plan": {"date": "2023-05-01", "meal_type": "dinner", "title": "Italian Night", "cook": "Chef", "dishes": [...]}}` |
-| `store_dish` | Stores a dish recipe | `{"dish_data": {"name": "Pasta", "ingredients": [...]}}` |
-| `list_dishes` | Lists all stored dishes | `{}` |
-| `list_mealplans_by_date_range` | Lists meal plans within a date range | `{"date_range": {"start": "2023-06-01", "end": "2023-06-07"}}` |
-| `export_mealplans_to_pdf` | Exports meal plans to a PDF file | `{"date_range": {"start": "2023-06-01", "end": "2023-06-07"}}` |
-| `add_ignored_ingredient` | Adds ingredient to ignore list | `{"ingredient": "salt"}` |
-| `get_ignored_ingredients` | Gets all ignored ingredients | `{}` |
-| `generate_grocery_list` | Creates a grocery list markdown | `{"date_range": {"start": "2023-06-01", "end": "2023-06-07"}}` |
 
 ## Project Structure
 
