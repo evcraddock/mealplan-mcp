@@ -31,7 +31,7 @@ repos:
 
     -   id: test-coverage
         name: check test coverage
-        entry: pytest tests/ --cov=models --cov-report=term-missing
+        entry: pytest tests/ --cov=mealplan_mcp --cov-report=term-missing
         language: system
         pass_filenames: false
         always_run: true

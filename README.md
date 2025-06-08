@@ -156,7 +156,32 @@ This returns a JSON array with meal plan summaries:
 ]
 ```
 
+### Example: Exporting Meal Plans to PDF
 
+```bash
+# Export meal plans for a specific month to PDF
+mcp call export_mealplans_to_pdf '{
+  "date_range": {
+    "start": "2023-06-01",
+    "end": "2023-06-30"
+  }
+}'
+```
+
+This returns a JSON response with the path to the generated PDF:
+
+```json
+{
+  "ok": "/path/to/mealplans/exports/mealplans_2023-06-01_to_2023-06-30.pdf"
+}
+```
+
+The generated PDF includes:
+- Professional formatting with headers and styling
+- All meal plans within the date range organized by date
+- Meal details including title, date, meal type, cook, and dishes
+- Proper page breaks for easy printing
+- "No content" message if no meal plans are found
 
 ## Available Tools
 
@@ -166,6 +191,7 @@ This returns a JSON array with meal plan summaries:
 | `store_dish` | Stores a dish recipe | `{"dish_data": {"name": "Pasta", "ingredients": [...]}}` |
 | `list_dishes` | Lists all stored dishes | `{}` |
 | `list_mealplans_by_date_range` | Lists meal plans within a date range | `{"date_range": {"start": "2023-06-01", "end": "2023-06-07"}}` |
+| `export_mealplans_to_pdf` | Exports meal plans to a PDF file | `{"date_range": {"start": "2023-06-01", "end": "2023-06-07"}}` |
 | `add_ignored_ingredient` | Adds ingredient to ignore list | `{"ingredient": "salt"}` |
 | `get_ignored_ingredients` | Gets all ignored ingredients | `{}` |
 | `generate_grocery_list` | Creates a grocery list markdown | `{"date_range": {"start": "2023-06-01", "end": "2023-06-07"}}` |
@@ -194,7 +220,7 @@ mealplan-mcp/
 │   └── utils/               # Utility functions
 │       ├── paths.py         # Path handling with test isolation
 │       └── slugify.py       # String slugification utilities
-├── tests/                   # Comprehensive test suite (91 tests)
+├── tests/                   # Comprehensive test suite (113 tests)
 └── docs/                    # Documentation
 ```
 
