@@ -9,6 +9,9 @@ wheels/
 .coverage
 coverage.xml
 
+# Test artifacts (meal plan directories created during testing)
+[0-9][0-9][0-9][0-9]/
+
 # Cache directories
 .cache/
 .ruff_cache/
