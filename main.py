@@ -20,6 +20,11 @@ from mealplan_mcp.services.grocery import (
     generate_grocery_list as generate_grocery_list_service,
 )
 
+# Import meal plan services
+from mealplan_mcp.services.mealplan.list_service import (
+    list_mealplans_by_date_range as list_mealplans_service,
+)
+
 app = FastMCP("mealplan", transport="stdio")
 
 
@@ -146,6 +151,74 @@ async def create_mealplan(meal_plan: MealPlan) -> str:
     )
 
     return result
+
+
+@app.tool()
+async def list_mealplans_by_date_range(date_range: dict) -> str:
+    """List meal plans within a specified date range.
+
+    Args:
+        date_range: Dictionary containing start and end dates in format YYYY-MM-DD
+            - start: Start date (required)
+            - end: End date (required)
+
+    Returns:
+        JSON string containing array of meal plan objects with:
+        - title: Meal title (cleaned)
+        - date: Date in YYYY-MM-DD format
+        - meal_type: Type of meal (breakfast, lunch, dinner, snack)
+        - cook: Person cooking the meal
+        - dishes: Array of dish names
+    """
+    try:
+        # Validate input
+        if not date_range:
+            return json.dumps(
+                {
+                    "error": "Missing date_range parameter",
+                    "message": "Please provide a date_range object with start and end dates",
+                }
+            )
+
+        start_date = date_range.get("start")
+        end_date = date_range.get("end")
+
+        if not start_date:
+            return json.dumps(
+                {
+                    "error": "Missing start date",
+                    "message": "Please provide a start date in YYYY-MM-DD format",
+                }
+            )
+
+        if not end_date:
+            return json.dumps(
+                {
+                    "error": "Missing end date",
+                    "message": "Please provide an end date in YYYY-MM-DD format",
+                }
+            )
+
+        # Call the service
+        result = list_mealplans_service(start_date, end_date)
+
+        # Return as JSON string
+        return json.dumps(result, indent=2)
+
+    except ValueError as e:
+        return json.dumps(
+            {
+                "error": "Invalid date format",
+                "message": f"Please use YYYY-MM-DD format for dates. Error: {str(e)}",
+            }
+        )
+    except Exception as e:
+        return json.dumps(
+            {
+                "error": "Internal error",
+                "message": f"An unexpected error occurred: {str(e)}",
+            }
+        )
 
 
 if __name__ == "__main__":
