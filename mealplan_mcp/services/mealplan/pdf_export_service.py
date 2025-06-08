@@ -15,7 +15,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
 from reportlab.lib.units import inch
 
 from mealplan_mcp.services.mealplan.list_service import list_mealplans_by_date_range
-from mealplan_mcp.utils.paths import mealplan_root
+from mealplan_mcp.utils.paths import pdf_export_path
 
 
 def export_mealplans_to_pdf(start_date: str, end_date: str) -> Path:
@@ -42,11 +42,10 @@ def export_mealplans_to_pdf(start_date: str, end_date: str) -> Path:
     # Get meal plans for the date range
     meal_plans = list_mealplans_by_date_range(start_date, end_date)
 
-    # Generate PDF filename
-    pdf_filename = f"mealplans_{start_date}_to_{end_date}.pdf"
-    pdf_path = mealplan_root / "exports" / pdf_filename
+    # Generate PDF path using the same directory structure as meal plans
+    pdf_path = pdf_export_path(start_date, end_date)
 
-    # Ensure export directory exists
+    # Ensure directory exists
     pdf_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Generate PDF

@@ -335,6 +335,10 @@ dev = [
     { name = "pytest-cov" },
     { name = "ruff" },
 ]
+mcp = [
+    { name = "markdown" },
+    { name = "reportlab" },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -354,6 +358,7 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.28.1" },
     { name = "markdown", specifier = ">=3.5.0" },
+    { name = "markdown", marker = "extra == 'mcp'", specifier = ">=3.5.0" },
     { name = "mcp", extras = ["cli"], specifier = ">=1.6.0" },
     { name = "pydantic", specifier = ">=2.0.0" },
     { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.350" },
@@ -361,10 +366,11 @@ requires-dist = [
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.1.0" },
     { name = "python-slugify", specifier = ">=8.0.0" },
     { name = "reportlab", specifier = ">=4.0.0" },
+    { name = "reportlab", marker = "extra == 'mcp'", specifier = ">=4.0.0" },
     { name = "rich", specifier = ">=13.7.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
 ]
-provides-extras = ["dev"]
+provides-extras = ["dev", "mcp"]
 
 [package.metadata.requires-dev]
 dev = [

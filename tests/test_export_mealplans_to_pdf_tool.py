@@ -28,13 +28,42 @@ from mealplan_mcp.services.mealplan.store import store_mealplan
 
 def _setup_test_environment(monkeypatch, temp_dir):
     """Set up the test environment with temporary directory."""
-    # Mock the mealplan_root in both services
+    # Mock the mealplan_root in list service
     monkeypatch.setattr(
         "mealplan_mcp.services.mealplan.list_service.mealplan_root", Path(temp_dir)
     )
+
+    # Mock the pdf_export_path function to use temp directory
+    def mock_pdf_export_path(start_date, end_date):
+        start = datetime.strptime(start_date, "%Y-%m-%d")
+        year = start.strftime("%Y")
+        month_num = start.strftime("%m")
+        month_name = [
+            "",
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+        ][start.month]
+
+        if start_date == end_date:
+            filename = f"mealplans_{start_date}.pdf"
+        else:
+            filename = f"mealplans_{start_date}_to_{end_date}.pdf"
+
+        return Path(temp_dir) / year / f"{month_num}-{month_name}" / filename
+
     monkeypatch.setattr(
-        "mealplan_mcp.services.mealplan.pdf_export_service.mealplan_root",
-        Path(temp_dir),
+        "mealplan_mcp.services.mealplan.pdf_export_service.pdf_export_path",
+        mock_pdf_export_path,
     )
 
     # Mock the path functions for store service

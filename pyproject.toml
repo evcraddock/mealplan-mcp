@@ -27,6 +27,11 @@ dev = [
     "coverage-badge>=1.1.0",
 ]
 
+mcp = [
+    "reportlab>=4.0.0",
+    "markdown>=3.5.0",
+]
+
 [tool.setuptools]
 packages = ["mealplan_mcp"]
 
