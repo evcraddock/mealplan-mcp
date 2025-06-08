@@ -67,8 +67,13 @@ Add this server configuration to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "mealplan": {
-      "command": "python",
-      "args": ["/path/to/your/mealplan-mcp/main.py"],
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/path/to/your/mealplan-mcp",
+        "run",
+        "main.py"
+      ],
       "env": {
         "MEALPLANPATH": "/path/to/your/meal/plans"
       }
