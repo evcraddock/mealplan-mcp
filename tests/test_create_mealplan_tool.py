@@ -65,10 +65,12 @@ async def test_create_mealplan_tool_basic(monkeypatch):
         assert "2023-06-15" in result
         assert "Meal plan saved to:" in result
 
-        # Check that the file was actually created
+        # Check that both files were actually created
         expected_dir = mock_mealplan_directory_path(date)
-        expected_file = expected_dir / "06-15-2023-dinner.md"
-        assert expected_file.exists()
+        expected_md_file = expected_dir / "06-15-2023-dinner.md"
+        expected_json_file = expected_dir / "06-15-2023-dinner.json"
+        assert expected_md_file.exists()
+        assert expected_json_file.exists()
 
 
 @pytest.mark.anyio

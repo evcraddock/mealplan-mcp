@@ -57,13 +57,16 @@ def test_store_new_mealplan(monkeypatch):
         expected_path = expected_dir / "06-15-2023-dinner.md"
 
         # Call the service
-        result_path = store_mealplan(meal_plan)
+        markdown_path, json_path = store_mealplan(meal_plan)
 
-        # Check that the file was created
-        assert str(result_path) == str(expected_path)
+        # Check that both files were created
+        expected_json_path = expected_path.with_suffix(".json")
+        assert str(markdown_path) == str(expected_path)
+        assert str(json_path) == str(expected_json_path)
         assert expected_path.exists()
+        assert expected_json_path.exists()
 
-        # Check the file contents
+        # Check the markdown file contents
         with open(expected_path, "r") as f:
             stored_content = f.read()
 
@@ -72,6 +75,18 @@ def test_store_new_mealplan(monkeypatch):
         assert "**Cook:** Chef Mario" in stored_content
         assert "**Meal Type:** dinner" in stored_content
         assert "- [ ] Italian Night (dinner,Chef Mario) #mealplan" in stored_content
+
+        # Check the JSON file contents
+        import json
+
+        with open(expected_json_path, "r") as f:
+            json_data = json.load(f)
+
+        # Verify key elements of the JSON content
+        assert json_data["title"] == "Italian Night"
+        assert json_data["cook"] == "Chef Mario"
+        assert json_data["meal_type"] == "dinner"
+        assert "cleaned_title" not in json_data  # Should be excluded
 
 
 def test_store_mealplan_with_collision(monkeypatch):
@@ -113,32 +128,51 @@ def test_store_mealplan_with_collision(monkeypatch):
         )
 
         # Store the first meal plan
-        result_path1 = store_mealplan(meal_plan1)
+        markdown_path1, json_path1 = store_mealplan(meal_plan1)
 
         # Store the second meal plan with the same date/meal type
         # This should append a suffix to the filename
-        result_path2 = store_mealplan(meal_plan2)
+        markdown_path2, json_path2 = store_mealplan(meal_plan2)
 
-        # Check that both files exist
+        # Check that all files exist
         expected_dir = mock_mealplan_directory_path(date)
-        expected_path1 = expected_dir / "06-15-2023-dinner.md"
-        expected_path2 = expected_dir / "06-15-2023-dinner-1.md"
+        expected_md1 = expected_dir / "06-15-2023-dinner.md"
+        expected_json1 = expected_dir / "06-15-2023-dinner.json"
+        expected_md2 = expected_dir / "06-15-2023-dinner-1.md"
+        expected_json2 = expected_dir / "06-15-2023-dinner-1.json"
 
-        assert expected_path1.exists()
-        assert expected_path2.exists()
-        assert str(result_path1) == str(expected_path1)
-        assert str(result_path2) == str(expected_path2)
+        assert expected_md1.exists()
+        assert expected_json1.exists()
+        assert expected_md2.exists()
+        assert expected_json2.exists()
+        assert str(markdown_path1) == str(expected_md1)
+        assert str(json_path1) == str(expected_json1)
+        assert str(markdown_path2) == str(expected_md2)
+        assert str(json_path2) == str(expected_json2)
 
-        # Check the contents of both files
-        with open(expected_path1, "r") as f:
+        # Check the contents of both markdown files
+        with open(expected_md1, "r") as f:
             content1 = f.read()
-        with open(expected_path2, "r") as f:
+        with open(expected_md2, "r") as f:
             content2 = f.read()
 
         assert "First Dinner" in content1
         assert "Chef 1" in content1
         assert "Second Dinner" in content2
         assert "Chef 2" in content2
+
+        # Check the contents of both JSON files
+        import json
+
+        with open(expected_json1, "r") as f:
+            json_data1 = json.load(f)
+        with open(expected_json2, "r") as f:
+            json_data2 = json.load(f)
+
+        assert json_data1["title"] == "First Dinner"
+        assert json_data1["cook"] == "Chef 1"
+        assert json_data2["title"] == "Second Dinner"
+        assert json_data2["cook"] == "Chef 2"
 
 
 def test_store_mealplan_creates_directory_structure(monkeypatch):
@@ -176,16 +210,19 @@ def test_store_mealplan_creates_directory_structure(monkeypatch):
         assert not expected_dir.exists()
 
         # Store the meal plan
-        result_path = store_mealplan(meal_plan)
+        markdown_path, json_path = store_mealplan(meal_plan)
 
         # Check that the directory was created
         assert expected_dir.exists()
         assert expected_dir.is_dir()
 
-        # Check that the file was created
-        expected_path = expected_dir / "12-25-2023-breakfast.md"
-        assert result_path == expected_path
-        assert expected_path.exists()
+        # Check that both files were created
+        expected_md_path = expected_dir / "12-25-2023-breakfast.md"
+        expected_json_path = expected_dir / "12-25-2023-breakfast.json"
+        assert markdown_path == expected_md_path
+        assert json_path == expected_json_path
+        assert expected_md_path.exists()
+        assert expected_json_path.exists()
 
 
 def test_store_mealplan_different_meal_types(monkeypatch):
@@ -224,15 +261,20 @@ def test_store_mealplan_different_meal_types(monkeypatch):
         # Store all meal plans
         result_paths = []
         for meal_plan in meal_plans:
-            result_paths.append(store_mealplan(meal_plan))
+            markdown_path, json_path = store_mealplan(meal_plan)
+            result_paths.extend([markdown_path, json_path])
 
         # Check that all files were created with correct names
         expected_dir = mock_mealplan_directory_path(date)
         expected_files = [
             "06-15-2023-breakfast.md",
+            "06-15-2023-breakfast.json",
             "06-15-2023-lunch.md",
+            "06-15-2023-lunch.json",
             "06-15-2023-dinner.md",
+            "06-15-2023-dinner.json",
             "06-15-2023-snack.md",
+            "06-15-2023-snack.json",
         ]
 
         for expected_file in expected_files:
@@ -298,14 +340,24 @@ def test_store_mealplan_with_default_values(monkeypatch):
         )
 
         # Store the meal plan
-        result_path = store_mealplan(meal_plan)
+        markdown_path, json_path = store_mealplan(meal_plan)
 
-        # Check that the file was created
-        assert result_path.exists()
+        # Check that both files were created
+        assert markdown_path.exists()
+        assert json_path.exists()
 
-        # Check the file contents include default values
-        with open(result_path, "r") as f:
+        # Check the markdown file contents include default values
+        with open(markdown_path, "r") as f:
             stored_content = f.read()
 
         assert "# Untitled Meal" in stored_content
         assert "**Cook:** Unknown" in stored_content
+
+        # Check the JSON file contents include default values
+        import json
+
+        with open(json_path, "r") as f:
+            json_data = json.load(f)
+
+        assert json_data["title"] == "Untitled Meal"
+        assert json_data["cook"] == "Unknown"

@@ -8,7 +8,7 @@ to the filesystem, including handling atomic file operations and directory creat
 import os
 import tempfile
 from pathlib import Path
-from typing import Set
+from typing import Set, Tuple
 
 from mealplan_mcp.models.meal_plan import MealPlan
 from mealplan_mcp.utils.paths import mealplan_directory_path, mealplan_path
@@ -16,9 +16,9 @@ from mealplan_mcp.renderers.mealplan import render_mealplan_markdown
 from mealplan_mcp.utils.slugify import suffix_if_exists
 
 
-def store_mealplan(meal_plan: MealPlan) -> Path:
+def store_mealplan(meal_plan: MealPlan) -> Tuple[Path, Path]:
     """
-    Store a meal plan to a markdown file based on its date and meal type.
+    Store a meal plan to both markdown and JSON files based on its date and meal type.
 
     If a meal plan with the same path already exists, a numerical suffix
     is added to the filename to ensure uniqueness.
@@ -27,7 +27,7 @@ def store_mealplan(meal_plan: MealPlan) -> Path:
         meal_plan: The meal plan model instance to store
 
     Returns:
-        The path to the stored meal plan file
+        A tuple containing (markdown_path, json_path) for the stored files
     """
     # Get the primary file path using the utility function
     primary_path = mealplan_path(meal_plan.date, meal_plan.meal_type.value)
@@ -47,45 +47,82 @@ def store_mealplan(meal_plan: MealPlan) -> Path:
 
         # Get existing base names (without extension) for suffix checking
         existing_base_names = {
-            f.replace(".md", "") for f in existing_files if f.endswith(".md")
+            f.replace(".md", "").replace(".json", "")
+            for f in existing_files
+            if f.endswith((".md", ".json"))
         }
 
         # Find a unique base name
         final_base_name = suffix_if_exists(base_name, existing_base_names)
-        final_filename = f"{final_base_name}{extension}"
+        final_filename_md = f"{final_base_name}{extension}"
+        final_filename_json = f"{final_base_name}.json"
 
-        # Create the final path in the same directory
-        file_path = primary_path.parent / final_filename
+        # Create the final paths in the same directory
+        markdown_path = primary_path.parent / final_filename_md
+        json_path = primary_path.parent / final_filename_json
     else:
-        file_path = primary_path
+        markdown_path = primary_path
+        json_path = primary_path.with_suffix(".json")
 
     # Ensure the parent directory exists
-    file_path.parent.mkdir(parents=True, exist_ok=True)
+    markdown_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Generate the markdown content
     markdown_content = render_mealplan_markdown(meal_plan)
 
-    # Use atomic write to ensure the file is either completely written or not at all
+    # Generate the JSON content
+    json_content = meal_plan.model_dump_json(indent=2, exclude={"cleaned_title"})
+
+    # Use atomic write to ensure both files are either completely written or not at all
     # This prevents corrupted files if the process is interrupted during writing
+
+    # Write markdown file atomically
     with tempfile.NamedTemporaryFile(
-        mode="w", delete=False, dir=file_path.parent
-    ) as tf:
+        mode="w", delete=False, dir=markdown_path.parent, suffix=".md"
+    ) as tf_md:
         # Write meal plan data to the temporary file
-        tf.write(markdown_content)
+        tf_md.write(markdown_content)
 
         # Make sure data is flushed to disk
-        tf.flush()
-        os.fsync(tf.fileno())
+        tf_md.flush()
+        os.fsync(tf_md.fileno())
 
         # Get temporary file name
-        temp_name = tf.name
+        temp_md_name = tf_md.name
 
-    # Atomically replace the target file with the temporary file
-    # This is the atomic write operation
-    os.replace(temp_name, file_path)
+    # Write JSON file atomically
+    with tempfile.NamedTemporaryFile(
+        mode="w", delete=False, dir=json_path.parent, suffix=".json"
+    ) as tf_json:
+        # Write JSON data to the temporary file
+        tf_json.write(json_content)
 
-    # Return the path to the stored file
-    return file_path
+        # Make sure data is flushed to disk
+        tf_json.flush()
+        os.fsync(tf_json.fileno())
+
+        # Get temporary file name
+        temp_json_name = tf_json.name
+
+    try:
+        # Atomically replace the target files with the temporary files
+        # This is the atomic write operation
+        os.replace(temp_md_name, markdown_path)
+        os.replace(temp_json_name, json_path)
+    except Exception:
+        # If something goes wrong, clean up the temporary files
+        try:
+            os.unlink(temp_md_name)
+        except FileNotFoundError:
+            pass
+        try:
+            os.unlink(temp_json_name)
+        except FileNotFoundError:
+            pass
+        raise
+
+    # Return the paths to both stored files
+    return markdown_path, json_path
 
 
 def _get_existing_mealplan_files(date) -> Set[str]:
@@ -96,7 +133,7 @@ def _get_existing_mealplan_files(date) -> Set[str]:
         date: The date to check for existing meal plans
 
     Returns:
-        A set of existing meal plan file names (including .md extension)
+        A set of existing meal plan file names (including .md and .json extensions)
     """
     # Get the directory for this date
     dir_path = mealplan_directory_path(date)
@@ -105,9 +142,10 @@ def _get_existing_mealplan_files(date) -> Set[str]:
     if not dir_path.exists():
         return set()
 
-    # Get all markdown files and extract their names
+    # Get all markdown and JSON files and extract their names
     files = set()
-    for file_path in dir_path.glob("*.md"):
-        files.add(file_path.name)
+    for file_path in dir_path.glob("*"):
+        if file_path.suffix in {".md", ".json"}:
+            files.add(file_path.name)
 
     return files
