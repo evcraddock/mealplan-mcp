@@ -140,3 +140,43 @@ def grocery_path(start_date: str, end_date: str) -> Path:
 
     # Build the full path
     return current_mealplan_root / year / f"{month_num}-{month_name}" / filename
+
+
+def pdf_export_path(start_date: str, end_date: str) -> Path:
+    """
+    Generate the path for a PDF export based on date range.
+
+    The path follows the pattern:
+    $MEALPLANPATH/YYYY/MM-MonthName/mealplans_start_date_to_end_date.pdf
+
+    If start_date and end_date are the same, the pattern is:
+    $MEALPLANPATH/YYYY/MM-MonthName/mealplans_date.pdf
+
+    Args:
+        start_date: Start date in YYYY-MM-DD format
+        end_date: End date in YYYY-MM-DD format
+
+    Returns:
+        Path: The full path to the PDF export file
+    """
+    # Get the current mealplan root path from environment
+    current_mealplan_root = Path(
+        os.environ.get("MEALPLANPATH", str(_get_default_mealplan_root()))
+    )
+
+    # Parse start date for directory structure
+    start = datetime.strptime(start_date, "%Y-%m-%d")
+    year = start.strftime("%Y")
+    month_num = start.strftime("%m")
+    month_name = calendar.month_name[start.month]
+
+    # Create the filename
+    if start_date == end_date:
+        # If it's for a single day, just use the date
+        filename = f"mealplans_{start_date}.pdf"
+    else:
+        # Otherwise use a date range
+        filename = f"mealplans_{start_date}_to_{end_date}.pdf"
+
+    # Build the full path
+    return current_mealplan_root / year / f"{month_num}-{month_name}" / filename

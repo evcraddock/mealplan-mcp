@@ -24,6 +24,9 @@ from mealplan_mcp.services.grocery import (
 from mealplan_mcp.services.mealplan.list_service import (
     list_mealplans_by_date_range as list_mealplans_service,
 )
+from mealplan_mcp.services.mealplan.pdf_export_service import (
+    export_mealplans_to_pdf as export_mealplans_service,
+)
 
 app = FastMCP("mealplan", transport="stdio")
 
@@ -204,6 +207,71 @@ async def list_mealplans_by_date_range(date_range: dict) -> str:
 
         # Return as JSON string
         return json.dumps(result, indent=2)
+
+    except ValueError as e:
+        return json.dumps(
+            {
+                "error": "Invalid date format",
+                "message": f"Please use YYYY-MM-DD format for dates. Error: {str(e)}",
+            }
+        )
+    except Exception as e:
+        return json.dumps(
+            {
+                "error": "Internal error",
+                "message": f"An unexpected error occurred: {str(e)}",
+            }
+        )
+
+
+@app.tool()
+async def export_mealplans_to_pdf(date_range: dict) -> str:
+    """Export meal plans within a specified date range to a PDF file.
+
+    Args:
+        date_range: Dictionary containing start and end dates in format YYYY-MM-DD
+            - start: Start date (required)
+            - end: End date (required)
+
+    Returns:
+        JSON string containing either:
+        - Success: {"ok": "path/to/generated.pdf"}
+        - Error: {"error": "error_type", "message": "error_description"}
+    """
+    try:
+        # Validate input
+        if not date_range:
+            return json.dumps(
+                {
+                    "error": "Missing date_range parameter",
+                    "message": "Please provide a date_range object with start and end dates",
+                }
+            )
+
+        start_date = date_range.get("start")
+        end_date = date_range.get("end")
+
+        if not start_date:
+            return json.dumps(
+                {
+                    "error": "Missing start date",
+                    "message": "Please provide a start date in YYYY-MM-DD format",
+                }
+            )
+
+        if not end_date:
+            return json.dumps(
+                {
+                    "error": "Missing end date",
+                    "message": "Please provide an end date in YYYY-MM-DD format",
+                }
+            )
+
+        # Call the service to export PDF
+        pdf_path = export_mealplans_service(start_date, end_date)
+
+        # Return success response with the path
+        return json.dumps({"ok": str(pdf_path)})
 
     except ValueError as e:
         return json.dumps(
