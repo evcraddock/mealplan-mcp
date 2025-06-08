@@ -1,0 +1,109 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+---
+description: Best practices for creating well-formatted GitHub issues via CLI
+globs: []
+alwaysApply: false
+---
+
+# GitHub Issue Formatting Best Practices
+
+When creating or editing GitHub issues via CLI using `gh issue create` or `gh issue edit`, follow these formatting guidelines to ensure professional, readable issues:
+
+## Issue Structure Template
+
+Every GitHub issue should follow this structure:
+
+```markdown
+## Problem
+Clear, concise description of the current issue or limitation.
+
+## Proposed Solution
+Detailed explanation of what you want to implement or change.
+
+### Implementation Details
+- Specific technical requirements
+- File locations that need changes
+- Architecture considerations
+
+## Acceptance Criteria
+- [ ] Specific, testable requirements using checkboxes
+- [ ] Clear success metrics
+- [ ] Edge cases to consider
+
+## Benefits
+- Clear value proposition
+- Impact on users/developers
+- Long-term advantages
+```
+
+## CLI Best Practices
+
+### Use Body Files for Complex Issues
+- **NEVER** include newlines in command line arguments
+- Create temporary files for issue bodies: `/tmp/issue_body.md`
+- Use `--body-file` flag instead of `--body` for multi-line content
+
+```bash
+# ✅ Correct approach
+gh issue create --title "Feature Title" --body-file /tmp/issue_body.md --label enhancement
+
+# ❌ Wrong approach - will fail
+gh issue create --title "Title" --body "Line 1
+Line 2"
+```
+
+### Markdown Formatting Rules
+- Use clean markdown without raw syntax or excessive escaping
+- Structure with proper headings (`##`, `###`)
+- Use bulleted lists with `-` for readability
+- Include checkboxes for actionable items: `- [ ]`
+- Code references use backticks: `` `function_name` ``
+- File paths use backticks: `` `path/to/file.py` ``
+
+### Content Guidelines
+- **Be specific**: Include exact file paths, function names, and technical details
+- **Use sections**: Break content into logical sections with headings
+- **Include context**: Explain current behavior vs desired behavior
+- **Add examples**: Show before/after code snippets when relevant
+- **List benefits**: Explain why this change matters
+
+## Common Mistakes to Avoid
+
+### Formatting Errors
+- ❌ Wall of text without structure
+- ❌ Raw markdown syntax that doesn't render
+- ❌ Missing headings and sections
+- ❌ Inline commands with newlines
+
+### Content Issues
+- ❌ Vague descriptions without specifics
+- ❌ Missing implementation details
+- ❌ No acceptance criteria
+- ❌ Unclear benefits or value proposition
+
+## Label Strategy
+- Use `enhancement` for new features
+- Use `bug` for defects
+- Use project-specific labels when available
+- Check available labels first: `gh label list`
+
+## Example Commands
+
+```bash
+# Create issue with proper formatting
+echo "Content here..." > /tmp/issue_body.md
+gh issue create --title "Clear, Descriptive Title" --body-file /tmp/issue_body.md --label enhancement
+
+# Edit existing issue
+echo "Updated content..." > /tmp/updated_body.md
+gh issue edit 123 --body-file /tmp/updated_body.md
+
+# Clean up temp files
+rm /tmp/issue_body.md
+```
+
+Remember: Well-formatted issues get faster responses and better collaboration!

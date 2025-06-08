@@ -134,13 +134,16 @@ async def create_mealplan(meal_plan: MealPlan) -> str:
     from mealplan_mcp.services.mealplan import store_mealplan
     from mealplan_mcp.renderers.mealplan import render_mealplan_summary
 
-    file_path = store_mealplan(meal_plan)
+    markdown_path, json_path = store_mealplan(meal_plan)
 
     # Generate summary for return value
     summary = render_mealplan_summary(meal_plan)
 
     # Add the file path information
-    result = summary + f"\n\nMeal plan saved to: {file_path}"
+    result = (
+        summary
+        + f"\n\nMeal plan saved to:\n  Markdown: {markdown_path}\n  JSON: {json_path}"
+    )
 
     return result
 
