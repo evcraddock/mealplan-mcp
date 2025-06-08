@@ -6,8 +6,8 @@ from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel, field_validator, ConfigDict, model_validator
 
-from models.meal_type import MealType
-from models.dish import Dish
+from mealplan_mcp.models.meal_type import MealType
+from mealplan_mcp.models.dish import Dish
 from mealplan_mcp.utils.slugify import slugify
 
 

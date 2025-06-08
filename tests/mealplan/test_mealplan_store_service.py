@@ -16,8 +16,8 @@ from datetime import datetime
 # Add the project root to the Python path to fix imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from models.meal_plan import MealPlan
-from models.meal_type import MealType
+from mealplan_mcp.models.meal_plan import MealPlan
+from mealplan_mcp.models.meal_type import MealType
 from mealplan_mcp.services.mealplan import store_mealplan
 
 

@@ -10,7 +10,7 @@ import tempfile
 from pathlib import Path
 from typing import Set
 
-from models.meal_plan import MealPlan
+from mealplan_mcp.models.meal_plan import MealPlan
 from mealplan_mcp.utils.paths import mealplan_directory_path, mealplan_path
 from mealplan_mcp.renderers.mealplan import render_mealplan_markdown
 from mealplan_mcp.utils.slugify import suffix_if_exists

@@ -12,8 +12,8 @@ from datetime import datetime
 # Add the project root to the Python path to fix imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from models.meal_plan import MealPlan
-from models.meal_type import MealType
+from mealplan_mcp.models.meal_plan import MealPlan
+from mealplan_mcp.models.meal_type import MealType
 
 
 @pytest.mark.anyio
@@ -106,10 +106,20 @@ async def test_create_mealplan_tool_with_defaults(monkeypatch):
                 / f"{month_num}-{day}-{year}"
             )
 
-        # Replace the path function
+        def mock_mealplan_path(date, meal_type):
+            date_str = (
+                f"{date.strftime('%m')}-{date.strftime('%d')}-{date.strftime('%Y')}"
+            )
+            return mock_mealplan_directory_path(date) / f"{date_str}-{meal_type}.md"
+
+        # Replace the path functions
         monkeypatch.setattr(
             "mealplan_mcp.services.mealplan.store.mealplan_directory_path",
             mock_mealplan_directory_path,
+        )
+        monkeypatch.setattr(
+            "mealplan_mcp.services.mealplan.store.mealplan_path",
+            mock_mealplan_path,
         )
 
         # Create a meal plan with minimal data (using defaults)
@@ -142,10 +152,20 @@ async def test_create_mealplan_tool_return_format(monkeypatch):
         def mock_mealplan_directory_path(date):
             return Path(temp_dir) / "2023" / "06-June" / "06-15-2023"
 
-        # Replace the path function
+        def mock_mealplan_path(date, meal_type):
+            date_str = (
+                f"{date.strftime('%m')}-{date.strftime('%d')}-{date.strftime('%Y')}"
+            )
+            return mock_mealplan_directory_path(date) / f"{date_str}-{meal_type}.md"
+
+        # Replace the path functions
         monkeypatch.setattr(
             "mealplan_mcp.services.mealplan.store.mealplan_directory_path",
             mock_mealplan_directory_path,
+        )
+        monkeypatch.setattr(
+            "mealplan_mcp.services.mealplan.store.mealplan_path",
+            mock_mealplan_path,
         )
 
         # Create a test meal plan

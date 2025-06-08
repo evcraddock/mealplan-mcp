@@ -6,13 +6,28 @@ used by the application, including dishes, grocery lists, and meal plans.
 """
 
 import os
+import sys
 import calendar
 from datetime import datetime
 from pathlib import Path
 
+
+def _get_default_mealplan_root() -> Path:
+    """
+    Get the default meal plan root directory.
+
+    During tests (when pytest is running), defaults to testing/ directory.
+    Otherwise defaults to current working directory.
+    """
+    # Check if we're running under pytest
+    if "pytest" in sys.modules or "PYTEST_CURRENT_TEST" in os.environ:
+        return Path(os.getcwd()) / "testing"
+    return Path(os.getcwd())
+
+
 # Get the meal plan root path from environment variable
-# Default to current directory if not set
-mealplan_root = Path(os.environ.get("MEALPLANPATH", os.getcwd()))
+# Default to testing/ during tests, current directory otherwise
+mealplan_root = Path(os.environ.get("MEALPLANPATH", str(_get_default_mealplan_root())))
 
 
 def dish_path(slug: str) -> Path:
@@ -43,7 +58,9 @@ def mealplan_path(date: datetime, meal_type: str) -> Path:
         Path: The full path to the meal plan markdown file
     """
     # Get the current mealplan root path from environment
-    current_mealplan_root = Path(os.environ.get("MEALPLANPATH", os.getcwd()))
+    current_mealplan_root = Path(
+        os.environ.get("MEALPLANPATH", str(_get_default_mealplan_root()))
+    )
 
     # Format date components
     year = date.strftime("%Y")
@@ -70,7 +87,9 @@ def mealplan_directory_path(date: datetime) -> Path:
         Path: The directory path for meal plans on this date
     """
     # Get the current mealplan root path from environment
-    current_mealplan_root = Path(os.environ.get("MEALPLANPATH", os.getcwd()))
+    current_mealplan_root = Path(
+        os.environ.get("MEALPLANPATH", str(_get_default_mealplan_root()))
+    )
 
     # Format date components
     year = date.strftime("%Y")
@@ -101,7 +120,9 @@ def grocery_path(start_date: str, end_date: str) -> Path:
         Path: The full path to the grocery list markdown file
     """
     # Get the current mealplan root path from environment
-    current_mealplan_root = Path(os.environ.get("MEALPLANPATH", os.getcwd()))
+    current_mealplan_root = Path(
+        os.environ.get("MEALPLANPATH", str(_get_default_mealplan_root()))
+    )
 
     # Parse start date for directory structure
     start = datetime.strptime(start_date, "%Y-%m-%d")

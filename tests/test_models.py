@@ -1,6 +1,6 @@
 """Basic tests for models."""
 
-from models.meal_type import MealType
+from mealplan_mcp.models.meal_type import MealType
 
 
 def test_meal_type_enum():
