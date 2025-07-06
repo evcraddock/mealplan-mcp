@@ -42,11 +42,7 @@ def test_store_new_mealplan(monkeypatch):
         def mock_mealplan_path(date, meal_type):
             return mock_mealplan_directory_path(date) / f"06-15-2023-{meal_type}.md"
 
-        # Replace the path functions in the store module
-        monkeypatch.setattr(
-            "mealplan_mcp.services.mealplan.store.mealplan_directory_path",
-            mock_mealplan_directory_path,
-        )
+        # Replace the path function in the store module
         monkeypatch.setattr(
             "mealplan_mcp.services.mealplan.store.mealplan_path",
             mock_mealplan_path,
@@ -90,7 +86,7 @@ def test_store_new_mealplan(monkeypatch):
 
 
 def test_store_mealplan_with_collision(monkeypatch):
-    """Test storing a meal plan when a file with the same name already exists."""
+    """Test storing a meal plan when a file with the same name already exists - should overwrite."""
     # Create a temp directory to use as the meal plan storage
     with tempfile.TemporaryDirectory() as temp_dir:
         # Set up two meal plans for the same date and meal type
@@ -119,10 +115,6 @@ def test_store_mealplan_with_collision(monkeypatch):
 
         # Replace the path functions
         monkeypatch.setattr(
-            "mealplan_mcp.services.mealplan.store.mealplan_directory_path",
-            mock_mealplan_directory_path,
-        )
-        monkeypatch.setattr(
             "mealplan_mcp.services.mealplan.store.mealplan_path",
             mock_mealplan_path,
         )
@@ -131,48 +123,38 @@ def test_store_mealplan_with_collision(monkeypatch):
         markdown_path1, json_path1 = store_mealplan(meal_plan1)
 
         # Store the second meal plan with the same date/meal type
-        # This should append a suffix to the filename
+        # This should overwrite the existing files
         markdown_path2, json_path2 = store_mealplan(meal_plan2)
 
-        # Check that all files exist
+        # Check that files exist at expected locations
         expected_dir = mock_mealplan_directory_path(date)
-        expected_md1 = expected_dir / "06-15-2023-dinner.md"
-        expected_json1 = expected_dir / "06-15-2023-dinner.json"
-        expected_md2 = expected_dir / "06-15-2023-dinner-1.md"
-        expected_json2 = expected_dir / "06-15-2023-dinner-1.json"
+        expected_md = expected_dir / "06-15-2023-dinner.md"
+        expected_json = expected_dir / "06-15-2023-dinner.json"
 
-        assert expected_md1.exists()
-        assert expected_json1.exists()
-        assert expected_md2.exists()
-        assert expected_json2.exists()
-        assert str(markdown_path1) == str(expected_md1)
-        assert str(json_path1) == str(expected_json1)
-        assert str(markdown_path2) == str(expected_md2)
-        assert str(json_path2) == str(expected_json2)
+        assert expected_md.exists()
+        assert expected_json.exists()
+        assert str(markdown_path1) == str(expected_md)
+        assert str(json_path1) == str(expected_json)
+        assert str(markdown_path2) == str(expected_md)
+        assert str(json_path2) == str(expected_json)
 
-        # Check the contents of both markdown files
-        with open(expected_md1, "r") as f:
-            content1 = f.read()
-        with open(expected_md2, "r") as f:
-            content2 = f.read()
+        # Check the contents - should only contain the second meal plan (overwritten)
+        with open(expected_md, "r") as f:
+            content = f.read()
 
-        assert "First Dinner" in content1
-        assert "Chef 1" in content1
-        assert "Second Dinner" in content2
-        assert "Chef 2" in content2
+        assert "Second Dinner" in content
+        assert "Chef 2" in content
+        assert "First Dinner" not in content
+        assert "Chef 1" not in content
 
-        # Check the contents of both JSON files
+        # Check the JSON content - should only contain the second meal plan
         import json
 
-        with open(expected_json1, "r") as f:
-            json_data1 = json.load(f)
-        with open(expected_json2, "r") as f:
-            json_data2 = json.load(f)
+        with open(expected_json, "r") as f:
+            json_data = json.load(f)
 
-        assert json_data1["title"] == "First Dinner"
-        assert json_data1["cook"] == "Chef 1"
-        assert json_data2["title"] == "Second Dinner"
-        assert json_data2["cook"] == "Chef 2"
+        assert json_data["title"] == "Second Dinner"
+        assert json_data["cook"] == "Chef 2"
 
 
 def test_store_mealplan_creates_directory_structure(monkeypatch):
@@ -195,11 +177,7 @@ def test_store_mealplan_creates_directory_structure(monkeypatch):
         def mock_mealplan_path(date, meal_type):
             return mock_mealplan_directory_path(date) / f"12-25-2023-{meal_type}.md"
 
-        # Replace the path functions
-        monkeypatch.setattr(
-            "mealplan_mcp.services.mealplan.store.mealplan_directory_path",
-            mock_mealplan_directory_path,
-        )
+        # Replace the path function
         monkeypatch.setattr(
             "mealplan_mcp.services.mealplan.store.mealplan_path",
             mock_mealplan_path,
@@ -248,11 +226,7 @@ def test_store_mealplan_different_meal_types(monkeypatch):
         def mock_mealplan_path(date, meal_type):
             return mock_mealplan_directory_path(date) / f"06-15-2023-{meal_type}.md"
 
-        # Replace the path functions
-        monkeypatch.setattr(
-            "mealplan_mcp.services.mealplan.store.mealplan_directory_path",
-            mock_mealplan_directory_path,
-        )
+        # Replace the path function
         monkeypatch.setattr(
             "mealplan_mcp.services.mealplan.store.mealplan_path",
             mock_mealplan_path,
@@ -329,11 +303,7 @@ def test_store_mealplan_with_default_values(monkeypatch):
             )
             return mock_mealplan_directory_path(date) / f"{date_str}-{meal_type}.md"
 
-        # Replace the path functions
-        monkeypatch.setattr(
-            "mealplan_mcp.services.mealplan.store.mealplan_directory_path",
-            mock_mealplan_directory_path,
-        )
+        # Replace the path function
         monkeypatch.setattr(
             "mealplan_mcp.services.mealplan.store.mealplan_path",
             mock_mealplan_path,

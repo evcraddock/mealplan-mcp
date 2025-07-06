@@ -64,10 +64,6 @@ def _setup_test_environment(monkeypatch, temp_dir):
         return mock_mealplan_directory_path(date) / f"{date_str}-{meal_type}.md"
 
     monkeypatch.setattr(
-        "mealplan_mcp.services.mealplan.store.mealplan_directory_path",
-        mock_mealplan_directory_path,
-    )
-    monkeypatch.setattr(
         "mealplan_mcp.services.mealplan.store.mealplan_path",
         mock_mealplan_path,
     )
