@@ -8,20 +8,18 @@ to the filesystem, including handling atomic file operations and directory creat
 import os
 import tempfile
 from pathlib import Path
-from typing import Set, Tuple
+from typing import Tuple
 
 from mealplan_mcp.models.meal_plan import MealPlan
-from mealplan_mcp.utils.paths import mealplan_directory_path, mealplan_path
+from mealplan_mcp.utils.paths import mealplan_path
 from mealplan_mcp.renderers.mealplan import render_mealplan_markdown
-from mealplan_mcp.utils.slugify import suffix_if_exists
 
 
 def store_mealplan(meal_plan: MealPlan) -> Tuple[Path, Path]:
     """
     Store a meal plan to both markdown and JSON files based on its date and meal type.
 
-    If a meal plan with the same path already exists, a numerical suffix
-    is added to the filename to ensure uniqueness.
+    If a meal plan with the same path already exists, it will be overwritten.
 
     Args:
         meal_plan: The meal plan model instance to store
@@ -32,37 +30,9 @@ def store_mealplan(meal_plan: MealPlan) -> Tuple[Path, Path]:
     # Get the primary file path using the utility function
     primary_path = mealplan_path(meal_plan.date, meal_plan.meal_type.value)
 
-    # Get all existing meal plan files for this date
-    existing_files = _get_existing_mealplan_files(meal_plan.date)
-
-    # Check if the primary file already exists
-    primary_filename = primary_path.name
-
-    # If the file exists, append a suffix to the base name (before extension)
-    if primary_filename in existing_files:
-        # Extract base name and extension from the primary filename
-        # For "06-15-2023-dinner.md", we want to suffix "06-15-2023-dinner"
-        base_name = primary_filename.replace(".md", "")
-        extension = ".md"
-
-        # Get existing base names (without extension) for suffix checking
-        existing_base_names = {
-            f.replace(".md", "").replace(".json", "")
-            for f in existing_files
-            if f.endswith((".md", ".json"))
-        }
-
-        # Find a unique base name
-        final_base_name = suffix_if_exists(base_name, existing_base_names)
-        final_filename_md = f"{final_base_name}{extension}"
-        final_filename_json = f"{final_base_name}.json"
-
-        # Create the final paths in the same directory
-        markdown_path = primary_path.parent / final_filename_md
-        json_path = primary_path.parent / final_filename_json
-    else:
-        markdown_path = primary_path
-        json_path = primary_path.with_suffix(".json")
+    # Use the primary path directly - overwrite if exists
+    markdown_path = primary_path
+    json_path = primary_path.with_suffix(".json")
 
     # Ensure the parent directory exists
     markdown_path.parent.mkdir(parents=True, exist_ok=True)
@@ -123,29 +93,3 @@ def store_mealplan(meal_plan: MealPlan) -> Tuple[Path, Path]:
 
     # Return the paths to both stored files
     return markdown_path, json_path
-
-
-def _get_existing_mealplan_files(date) -> Set[str]:
-    """
-    Get the set of existing meal plan files for a specific date.
-
-    Args:
-        date: The date to check for existing meal plans
-
-    Returns:
-        A set of existing meal plan file names (including .md and .json extensions)
-    """
-    # Get the directory for this date
-    dir_path = mealplan_directory_path(date)
-
-    # If the directory doesn't exist, no files exist
-    if not dir_path.exists():
-        return set()
-
-    # Get all markdown and JSON files and extract their names
-    files = set()
-    for file_path in dir_path.glob("*"):
-        if file_path.suffix in {".md", ".json"}:
-            files.add(file_path.name)
-
-    return files

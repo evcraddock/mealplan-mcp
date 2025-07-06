@@ -32,11 +32,7 @@ async def test_create_mealplan_tool_basic(monkeypatch):
         def mock_mealplan_path(date, meal_type):
             return mock_mealplan_directory_path(date) / f"06-15-2023-{meal_type}.md"
 
-        # Replace the path functions in the store module
-        monkeypatch.setattr(
-            "mealplan_mcp.services.mealplan.store.mealplan_directory_path",
-            mock_mealplan_directory_path,
-        )
+        # Replace the path function in the store module
         monkeypatch.setattr(
             "mealplan_mcp.services.mealplan.store.mealplan_path",
             mock_mealplan_path,
@@ -114,11 +110,7 @@ async def test_create_mealplan_tool_with_defaults(monkeypatch):
             )
             return mock_mealplan_directory_path(date) / f"{date_str}-{meal_type}.md"
 
-        # Replace the path functions
-        monkeypatch.setattr(
-            "mealplan_mcp.services.mealplan.store.mealplan_directory_path",
-            mock_mealplan_directory_path,
-        )
+        # Replace the path function
         monkeypatch.setattr(
             "mealplan_mcp.services.mealplan.store.mealplan_path",
             mock_mealplan_path,
@@ -160,11 +152,7 @@ async def test_create_mealplan_tool_return_format(monkeypatch):
             )
             return mock_mealplan_directory_path(date) / f"{date_str}-{meal_type}.md"
 
-        # Replace the path functions
-        monkeypatch.setattr(
-            "mealplan_mcp.services.mealplan.store.mealplan_directory_path",
-            mock_mealplan_directory_path,
-        )
+        # Replace the path function
         monkeypatch.setattr(
             "mealplan_mcp.services.mealplan.store.mealplan_path",
             mock_mealplan_path,
