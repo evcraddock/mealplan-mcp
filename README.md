@@ -16,7 +16,7 @@ export MEALPLANPATH="/path/to/meal/plans"
 
 # Install dependencies with uv
 uv venv && source .venv/bin/activate
-uv pip install -e ".[dev]"
+uv pip install -e .
 
 # Run the server
 python main.py
@@ -129,11 +129,15 @@ Add this server configuration to your `claude_desktop_config.json`:
 
 4. Install dependencies:
    ```bash
-   # Using uv (recommended)
+   # For basic usage (recommended)
+   uv pip install -e .
+
+   # For development (includes testing tools)
    uv pip install -e ".[dev]"
 
    # Alternative: Using pip
-   pip install -e ".[dev]"
+   pip install -e .              # Basic usage
+   pip install -e ".[dev]"       # Development
    ```
 
 ### Running the Application
