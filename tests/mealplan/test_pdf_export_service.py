@@ -367,3 +367,76 @@ class TestPdfExportService:
             assert pdf_path.exists()
             assert pdf_path.is_file()
             assert pdf_path.stat().st_size > 0
+
+    def test_meal_plans_ordered_by_meal_type(self, monkeypatch):
+        """Test that meal plans are ordered by meal type (breakfast, lunch, dinner) within each day."""
+        from mealplan_mcp.services.mealplan.pdf_export_service import (
+            get_mealplan_files_with_content,
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            _setup_test_environment(monkeypatch, temp_dir)
+
+            # Create meal plans in non-ordered sequence
+            meal_plans = [
+                MealPlan(
+                    date=datetime(2023, 6, 15),
+                    meal_type=MealType.DINNER,
+                    title="Dinner First",
+                    cook="Chef",
+                    dishes=[Dish(name="Steak")],
+                ),
+                MealPlan(
+                    date=datetime(2023, 6, 15),
+                    meal_type=MealType.BREAKFAST,
+                    title="Breakfast Second",
+                    cook="Chef",
+                    dishes=[Dish(name="Eggs")],
+                ),
+                MealPlan(
+                    date=datetime(2023, 6, 15),
+                    meal_type=MealType.LUNCH,
+                    title="Lunch Third",
+                    cook="Chef",
+                    dishes=[Dish(name="Salad")],
+                ),
+                MealPlan(
+                    date=datetime(2023, 6, 16),
+                    meal_type=MealType.LUNCH,
+                    title="Next Day Lunch",
+                    cook="Chef",
+                    dishes=[Dish(name="Soup")],
+                ),
+                MealPlan(
+                    date=datetime(2023, 6, 16),
+                    meal_type=MealType.BREAKFAST,
+                    title="Next Day Breakfast",
+                    cook="Chef",
+                    dishes=[Dish(name="Pancakes")],
+                ),
+            ]
+
+            # Store all meal plans
+            for meal_plan in meal_plans:
+                store_mealplan(meal_plan)
+
+            # Get meal plans for the date range
+            retrieved_plans = get_mealplan_files_with_content(
+                "2023-06-15", "2023-06-16"
+            )
+
+            # Verify we have all plans
+            assert len(retrieved_plans) == 5
+
+            # Verify ordering for June 15
+            june_15_plans = [p for p in retrieved_plans if p["date"] == "2023-06-15"]
+            assert len(june_15_plans) == 3
+            assert june_15_plans[0]["meal_type"] == "breakfast"
+            assert june_15_plans[1]["meal_type"] == "lunch"
+            assert june_15_plans[2]["meal_type"] == "dinner"
+
+            # Verify ordering for June 16
+            june_16_plans = [p for p in retrieved_plans if p["date"] == "2023-06-16"]
+            assert len(june_16_plans) == 2
+            assert june_16_plans[0]["meal_type"] == "breakfast"
+            assert june_16_plans[1]["meal_type"] == "lunch"
