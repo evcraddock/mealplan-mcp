@@ -101,8 +101,17 @@ def get_mealplan_files_with_content(
                                 }
                             )
 
-    # Sort by date, then by meal type, then by title
-    meal_plans.sort(key=lambda x: (x["date"], x["meal_type"], x["title"]))
+    # Define meal type order: breakfast -> lunch -> dinner -> snack
+    meal_type_order = {"breakfast": 0, "lunch": 1, "dinner": 2, "snack": 3}
+
+    # Sort by date, then by meal type order (not alphabetically), then by title
+    meal_plans.sort(
+        key=lambda x: (
+            x["date"],
+            meal_type_order.get(x["meal_type"], 99),  # Default to 99 for unknown types
+            x["title"],
+        )
+    )
     return meal_plans
 
 
@@ -306,7 +315,7 @@ def _generate_pdf_with_reportlab(
 
 
 def _add_markdown_content_to_story(
-    markdown_content: str, story: list, styles: dict
+    markdown_content: str, story: list, styles: Any
 ) -> None:
     """
     Convert markdown content to PDF elements using proper markdown rendering.
