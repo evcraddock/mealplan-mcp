@@ -37,13 +37,13 @@ use handlers::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    println!("Starting Meal Plan MCP Server");
+    tracing::info!("Starting Meal Plan MCP Server");
     
     // Load configuration
     let config = match Config::load(None) {
         Ok(config) => {
-            println!("Configuration loaded successfully");
-            println!("Root folder: {}", config.root_folder.display());
+            tracing::info!("Configuration loaded successfully");
+            tracing::info!("Root folder: {}", config.root_folder.display());
             Arc::new(config)
         },
         Err(err) => {
@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
     
     // Start the server
     let server_handle = server.start().await?;
-    println!("Meal Plan MCP Server started successfully");
+    tracing::info!("Meal Plan MCP Server started successfully");
     
     // Wait for shutdown signal
     match signal::ctrl_c().await {

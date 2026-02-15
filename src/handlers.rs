@@ -10,10 +10,13 @@ use crate::models::{CreateMealPlanRequest, CreateMealPlanResponse, ListMealPlans
 use crate::storage::{compute_directory_path, compute_file_path, ensure_directories_exist, meal_plan_exists, write_meal_plan};
 use crate::parser::{extract_frontmatter, parse_frontmatter, serialize_meal_plan_to_markdown, deserialize_markdown_to_meal_plan};
 use crate::errors::{AlreadyExistsError, NotFoundError};
+use rmcp::tool;
 
 /// Handler for the createMealPlan command
+#[toolbox::tool]
 pub async fn create_meal_plan(request: CreateMealPlanRequest, config: &Config) -> Result<CreateMealPlanResponse> {
     // Validate request fields
+
     request.validate()?;
     
     // Compute file path
